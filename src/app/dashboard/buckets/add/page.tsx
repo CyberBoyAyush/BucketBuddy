@@ -44,20 +44,20 @@ export default function AddBucketPage() {
         <div className="flex items-center space-x-4">
           <Link
             href="/dashboard/buckets"
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hetzner-text-muted hover:hetzner-text hetzner-hover rounded-lg transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">Add New Bucket</h1>
-            <p className="text-gray-400">
+            <h1 className="text-2xl font-bold hetzner-text">Add New Bucket</h1>
+            <p className="hetzner-text-muted">
               Connect your S3 or R2 storage bucket to start managing files
             </p>
           </div>
         </div>
 
         {/* Form */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+        <div className="hetzner-card rounded-xl p-6">
           <BucketForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
         </div>
       </div>

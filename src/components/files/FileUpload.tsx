@@ -33,19 +33,19 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
 
     switch (fileType) {
       case "image":
-        return <Image className={`${iconClass} text-green-500`} />;
+        return <Image className={`${iconClass} text-green-400`} />;
       case "video":
-        return <Video className={`${iconClass} text-purple-500`} />;
+        return <Video className={`${iconClass} text-purple-400`} />;
       case "audio":
-        return <Music className={`${iconClass} text-pink-500`} />;
+        return <Music className={`${iconClass} text-pink-400`} />;
       case "document":
-        return <FileText className={`${iconClass} text-red-500`} />;
+        return <FileText className={`${iconClass} hetzner-red`} />;
       case "code":
-        return <Code className={`${iconClass} text-yellow-500`} />;
+        return <Code className={`${iconClass} text-yellow-400`} />;
       case "archive":
-        return <Archive className={`${iconClass} text-orange-500`} />;
+        return <Archive className={`${iconClass} text-orange-400`} />;
       default:
-        return <File className={`${iconClass} text-gray-500`} />;
+        return <File className={`${iconClass} hetzner-text-muted`} />;
     }
   };
 
@@ -165,26 +165,26 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
   const getStatusIcon = (status: UploadFile["status"]) => {
     switch (status) {
       case "uploading":
-        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+        return <Loader2 className="h-4 w-4 hetzner-red animate-spin" />;
       case "success":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-green-400" />;
       case "error":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-400" />;
       default:
-        return <File className="h-4 w-4 text-gray-500" />;
+        return <File className="h-4 w-4 hetzner-text-muted" />;
     }
   };
 
   const getStatusColor = (status: UploadFile["status"]) => {
     switch (status) {
       case "uploading":
-        return "border-blue-500/20 bg-blue-500/5";
+        return "hetzner-border bg-red-500/5";
       case "success":
         return "border-green-500/20 bg-green-500/5";
       case "error":
         return "border-red-500/20 bg-red-500/5";
       default:
-        return "border-white/10 bg-white/5";
+        return "hetzner-border bg-white/5";
     }
   };
 
@@ -194,13 +194,21 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-black border border-white/10 rounded-lg max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
+      <div className="hetzner-card rounded-xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <h2 className="text-lg font-semibold text-white">Upload Files</h2>
+        <div className="flex items-center justify-between p-6 border-b hetzner-border">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 hetzner-red-bg rounded-lg">
+              <Upload className="h-5 w-5 hetzner-text" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold hetzner-text">Upload Files</h2>
+              <p className="text-sm hetzner-text-muted">Add files to {currentPath || 'root directory'}</p>
+            </div>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-150"
+            className="p-2 hetzner-text-muted hover:hetzner-text hetzner-hover rounded-lg transition-colors duration-150"
           >
             <X className="h-5 w-5" />
           </button>
@@ -211,128 +219,149 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
           {uploadFiles.length === 0 ? (
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all duration-200 ${
+              className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${
                 isDragActive
-                  ? "border-white/40 bg-white/5 scale-[1.01]"
-                  : "border-white/20 hover:border-white/30 hover:bg-white/[0.02]"
+                  ? "border-red-500/50 bg-red-500/5 scale-[1.01] shadow-lg shadow-red-500/10"
+                  : "hetzner-border hover:border-red-500/30 hover:bg-red-500/[0.02]"
               }`}
             >
               <input {...getInputProps()} />
               <div className="flex flex-col items-center">
-                <div className={`p-4 rounded-lg mb-6 transition-colors ${
-                  isDragActive ? "bg-white/10" : "bg-white/5"
+                <div className={`p-6 rounded-xl mb-6 transition-all duration-200 ${
+                  isDragActive ? "bg-red-500/10 scale-110" : "bg-white/5"
                 }`}>
-                  <Upload className={`h-10 w-10 transition-colors ${
-                    isDragActive ? "text-white" : "text-gray-500"
+                  <Upload className={`h-12 w-12 transition-all duration-200 ${
+                    isDragActive ? "hetzner-red scale-110" : "hetzner-text-muted"
                   }`} />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  {isDragActive ? "Drop files here" : "Upload files"}
+                <h3 className="text-xl font-semibold hetzner-text mb-3">
+                  {isDragActive ? "Drop files here" : "Upload your files"}
                 </h3>
-                <p className="text-gray-500 mb-8 max-w-sm leading-relaxed">
+                <p className="hetzner-text-muted mb-8 max-w-md leading-relaxed text-center">
                   Drag and drop your files here, or click the button below to browse and select files from your computer
                 </p>
-                <button className="inline-flex items-center px-6 py-2.5 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium">
-                  <Upload className="h-4 w-4 mr-2" />
+                <button className="inline-flex items-center px-8 py-3 hetzner-btn-primary rounded-lg transition-all duration-150 font-medium shadow-lg hover:shadow-xl">
+                  <Upload className="h-5 w-5 mr-2" />
                   Choose Files
                 </button>
-                <p className="text-gray-600 text-xs mt-4">
-                  Supports all file types • Max 100MB per file
-                </p>
+                <div className="flex items-center space-x-4 mt-6 text-xs hetzner-text-subtle">
+                  <span className="flex items-center">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    All file types supported
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Max 100MB per file
+                  </span>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Progress Summary */}
-              <div className="bg-white/5 rounded-lg p-5 border border-white/10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-white font-medium">
+              <div className="bg-white/5 rounded-xl p-6 hetzner-border">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-white/10 rounded-lg">
+                      <CheckCircle className="h-5 w-5 text-green-400" />
+                    </div>
+                    <div>
+                      <span className="hetzner-text font-semibold text-lg">
                         Upload Progress
                       </span>
+                      <p className="hetzner-text-muted text-sm">
+                        {successfulUploads} of {totalFiles} files completed
+                      </p>
                     </div>
-                    <span className="text-gray-500 text-sm">
-                      ({successfulUploads}/{totalFiles} files)
-                    </span>
                   </div>
                   <div className="flex items-center space-x-4 text-sm">
                     {successfulUploads > 0 && (
-                      <span className="text-green-400 flex items-center">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        {successfulUploads} completed
-                      </span>
+                      <div className="flex items-center px-3 py-1 bg-green-500/10 rounded-full">
+                        <CheckCircle className="h-3 w-3 mr-1 text-green-400" />
+                        <span className="text-green-400 font-medium">{successfulUploads} completed</span>
+                      </div>
                     )}
                     {failedUploads > 0 && (
-                      <span className="text-red-400 flex items-center">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        {failedUploads} failed
-                      </span>
+                      <div className="flex items-center px-3 py-1 bg-red-500/10 rounded-full">
+                        <AlertCircle className="h-3 w-3 mr-1 text-red-400" />
+                        <span className="text-red-400 font-medium">{failedUploads} failed</span>
+                      </div>
                     )}
                   </div>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-white h-2 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${(successfulUploads / totalFiles) * 100}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-3">
-                  <span>{Math.round((successfulUploads / totalFiles) * 100)}% complete</span>
-                  <span>{totalFiles - successfulUploads} remaining</span>
+                <div className="space-y-3">
+                  <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-red-500 to-red-400 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
+                      style={{ width: `${(successfulUploads / totalFiles) * 100}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="hetzner-text font-medium">{Math.round((successfulUploads / totalFiles) * 100)}% complete</span>
+                    <span className="hetzner-text-muted">{totalFiles - successfulUploads} remaining</span>
+                  </div>
                 </div>
               </div>
 
               {/* File List */}
-              <div className="max-h-64 overflow-y-auto space-y-2">
+              <div className="max-h-80 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                 {uploadFiles.map((uploadFile) => (
                   <div
                     key={uploadFile.id}
-                    className={`flex items-center justify-between p-4 border rounded-lg transition-all ${getStatusColor(uploadFile.status)}`}
+                    className={`flex items-center justify-between p-5 border rounded-xl transition-all duration-200 hover:shadow-sm ${getStatusColor(uploadFile.status)}`}
                   >
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="flex-shrink-0">
+                    <div className="flex items-center space-x-4 flex-1 min-w-0">
+                      <div className="flex-shrink-0 p-2 bg-white/5 rounded-lg">
                         {getFileIcon(uploadFile.file.name)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium truncate">
+                        <p className="hetzner-text font-medium truncate text-base">
                           {uploadFile.file.name}
                         </p>
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
-                          <span>{formatFileSize(uploadFile.file.size)}</span>
+                        <div className="flex items-center space-x-3 text-sm hetzner-text-muted mt-1">
+                          <span className="font-medium">{formatFileSize(uploadFile.file.size)}</span>
                           <span>•</span>
-                          <span className="capitalize">{getFileType(uploadFile.file.name)}</span>
+                          <span className="capitalize px-2 py-0.5 bg-white/10 rounded-full text-xs">
+                            {getFileType(uploadFile.file.name)}
+                          </span>
                         </div>
                         {uploadFile.status === "uploading" && (
-                          <div className="mt-2">
-                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                              <span>Uploading...</span>
-                              <span>{uploadFile.progress}%</span>
+                          <div className="mt-3">
+                            <div className="flex items-center justify-between text-sm hetzner-text-muted mb-2">
+                              <span className="flex items-center">
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                Uploading...
+                              </span>
+                              <span className="font-medium">{uploadFile.progress}%</span>
                             </div>
-                            <div className="w-full bg-white/10 rounded-full h-1">
+                            <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
                               <div
-                                className="bg-white h-1 rounded-full transition-all duration-300"
+                                className="bg-gradient-to-r from-red-500 to-red-400 h-2 rounded-full transition-all duration-300 shadow-sm"
                                 style={{ width: `${uploadFile.progress}%` }}
                               />
                             </div>
                           </div>
                         )}
                         {uploadFile.error && (
-                          <p className="text-red-400 text-xs mt-1 flex items-center">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            {uploadFile.error}
-                          </p>
+                          <div className="mt-2 p-2 bg-red-500/10 rounded-lg">
+                            <p className="text-red-400 text-sm flex items-center">
+                              <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                              {uploadFile.error}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(uploadFile.status)}
+                    <div className="flex items-center space-x-3 ml-4">
+                      <div className="p-2 rounded-lg bg-white/5">
+                        {getStatusIcon(uploadFile.status)}
+                      </div>
                       {uploadFile.status === "pending" && (
                         <button
                           onClick={() => removeFile(uploadFile.id)}
-                          className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                          className="p-2 hetzner-text-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-150"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -345,19 +374,25 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
               {/* Add More Files */}
               <div
                 {...getRootProps()}
-                className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors duration-150 ${
+                className={`border border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
                   isDragActive
-                    ? "border-white/40 bg-white/5"
-                    : "border-white/20 hover:border-white/30 hover:bg-white/[0.02]"
+                    ? "border-red-500/50 bg-red-500/5 scale-[1.01]"
+                    : "hetzner-border hover:border-red-500/30 hover:bg-red-500/[0.02]"
                 }`}
               >
                 <input {...getInputProps()} />
                 <div className="flex flex-col items-center">
-                  <Upload className="h-6 w-6 text-gray-500 mb-2" />
-                  <p className="text-gray-400 text-sm font-medium mb-1">
+                  <div className={`p-3 rounded-lg mb-3 transition-all duration-200 ${
+                    isDragActive ? "bg-red-500/10 scale-110" : "bg-white/5"
+                  }`}>
+                    <Upload className={`h-6 w-6 transition-all duration-200 ${
+                      isDragActive ? "hetzner-red" : "hetzner-text-muted"
+                    }`} />
+                  </div>
+                  <p className="hetzner-text font-medium mb-1">
                     {isDragActive ? "Drop files here" : "Add more files"}
                   </p>
-                  <p className="text-gray-600 text-xs">
+                  <p className="hetzner-text-subtle text-sm">
                     Drag and drop or click to browse
                   </p>
                 </div>
@@ -368,28 +403,37 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
 
         {/* Footer */}
         {uploadFiles.length > 0 && (
-          <div className="flex items-center justify-between p-6 border-t border-white/10">
-            <div className="text-sm text-gray-500">
-              {totalFiles} file{totalFiles !== 1 ? 's' : ''} selected
+          <div className="flex items-center justify-between p-6 border-t hetzner-border bg-white/[0.02]">
+            <div className="flex items-center space-x-4">
+              <div className="text-sm hetzner-text-muted">
+                <span className="font-medium hetzner-text">{totalFiles}</span> file{totalFiles !== 1 ? 's' : ''} selected
+              </div>
+              {uploading && (
+                <div className="flex items-center text-sm hetzner-text-muted">
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin hetzner-red" />
+                  Uploading files...
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-3">
               <button
                 onClick={onClose}
-                className="px-4 py-2 border border-white/20 text-gray-400 rounded-lg hover:bg-white/5 hover:text-white transition-colors duration-150"
+                disabled={uploading}
+                className="px-6 py-2 hetzner-btn-secondary disabled:opacity-50 rounded-lg transition-colors duration-150"
               >
                 Cancel
               </button>
               <button
                 onClick={uploadAll}
                 disabled={uploading || uploadFiles.filter(f => f.status === "pending").length === 0}
-                className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 disabled:text-black/50 rounded-lg transition-colors duration-150"
+                className="inline-flex items-center px-6 py-2 hetzner-btn-primary disabled:opacity-50 rounded-lg transition-all duration-150 shadow-lg hover:shadow-xl"
               >
                 {uploading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4 mr-2" />
                 )}
-                Upload Files
+                Upload {uploadFiles.filter(f => f.status === "pending").length} Files
               </button>
             </div>
           </div>

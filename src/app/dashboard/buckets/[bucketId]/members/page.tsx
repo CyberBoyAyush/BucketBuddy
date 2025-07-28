@@ -151,7 +151,7 @@ export default function BucketMembersPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 hetzner-red"></div>
         </div>
       </DashboardLayout>
     );
@@ -161,8 +161,8 @@ export default function BucketMembersPage() {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <h3 className="text-xl font-semibold text-white mb-2">Bucket not found</h3>
-          <Link href="/dashboard/buckets" className="text-blue-400 hover:text-blue-300">
+          <h3 className="text-xl font-semibold hetzner-text mb-2">Bucket not found</h3>
+          <Link href="/dashboard/buckets" className="hetzner-red hover:text-red-300">
             Back to buckets
           </Link>
         </div>
@@ -178,20 +178,20 @@ export default function BucketMembersPage() {
           <div className="flex items-center space-x-4">
             <Link
               href={`/dashboard/buckets/${bucketId}`}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 hetzner-text-muted hover:hetzner-text hetzner-hover rounded-lg transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-white">{bucket.name} Members</h1>
-              <p className="text-gray-400">Manage access and permissions for this bucket</p>
+              <h1 className="text-2xl font-bold hetzner-text">{bucket.name} Members</h1>
+              <p className="hetzner-text-muted">Manage access and permissions for this bucket</p>
             </div>
           </div>
-          
+
           {bucket.isOwner && (
             <button
               onClick={() => setShowInviteForm(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 hetzner-btn-primary rounded-lg transition-colors"
             >
               <UserPlus className="h-5 w-5 mr-2" />
               Invite Member
@@ -201,38 +201,38 @@ export default function BucketMembersPage() {
 
         {/* Invite Form */}
         {showInviteForm && (
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Invite New Member</h3>
+          <div className="hetzner-card rounded-xl p-6">
+            <h3 className="text-lg font-semibold hetzner-text mb-4">Invite New Member</h3>
             <form onSubmit={handleInvite} className="space-y-4">
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                   <p className="text-red-400 text-sm">{error}</p>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium hetzner-text mb-2">
                     Email Address
                   </label>
                   <input
                     type="email"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors duration-150"
                     placeholder="user@example.com"
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium hetzner-text mb-2">
                     Role
                   </label>
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text focus:outline-none focus:border-red-500 transition-colors duration-150"
                   >
                     <option value="viewer">Viewer - Can view files</option>
                     <option value="editor">Editor - Can upload and delete files</option>
@@ -240,19 +240,19 @@ export default function BucketMembersPage() {
                   </select>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-4">
                 <button
                   type="button"
                   onClick={() => setShowInviteForm(false)}
-                  className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                  className="px-4 py-2 hetzner-btn-secondary rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={inviting}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white rounded-lg transition-colors"
+                  className="inline-flex items-center px-4 py-2 hetzner-btn-primary disabled:opacity-50 rounded-lg transition-colors"
                 >
                   {inviting ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -267,22 +267,22 @@ export default function BucketMembersPage() {
         )}
 
         {/* Members List */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">
+        <div className="hetzner-card rounded-xl p-6">
+          <h3 className="text-lg font-semibold hetzner-text mb-4">
             Members ({members.length})
           </h3>
 
           {members.length === 0 ? (
             <div className="text-center py-8">
-              <UserPlus className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-white mb-2">No members yet</h4>
-              <p className="text-gray-400 mb-4">
+              <UserPlus className="h-12 w-12 hetzner-text-muted mx-auto mb-4" />
+              <h4 className="text-lg font-medium hetzner-text mb-2">No members yet</h4>
+              <p className="hetzner-text-muted mb-4">
                 Invite team members to collaborate on this bucket
               </p>
               {bucket.isOwner && (
                 <button
                   onClick={() => setShowInviteForm(true)}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  className="inline-flex items-center px-4 py-2 hetzner-btn-primary rounded-lg transition-colors"
                 >
                   <UserPlus className="h-5 w-5 mr-2" />
                   Invite First Member
@@ -294,25 +294,25 @@ export default function BucketMembersPage() {
               {members.map((member) => (
                 <div
                   key={member.id}
-                  className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-white/5 hetzner-border rounded-lg"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-medium">
+                    <div className="w-10 h-10 hetzner-red-bg rounded-full flex items-center justify-center">
+                      <span className="hetzner-text font-medium">
                         {member.user.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <p className="text-white font-medium">{member.user.name}</p>
+                        <p className="hetzner-text font-medium">{member.user.name}</p>
                         {!member.acceptedAt && (
                           <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 text-xs rounded-full">
                             Pending
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-400 text-sm">{member.user.email}</p>
-                      <p className="text-gray-500 text-xs">
+                      <p className="hetzner-text-muted text-sm">{member.user.email}</p>
+                      <p className="hetzner-text-subtle text-xs">
                         Invited by {member.inviter.name} on{" "}
                         {new Date(member.invitedAt).toLocaleDateString()}
                       </p>
@@ -328,7 +328,7 @@ export default function BucketMembersPage() {
                     {bucket.isOwner && member.user.id !== bucket.id && (
                       <button
                         onClick={() => handleRemoveMember(member.id)}
-                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 hetzner-text-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

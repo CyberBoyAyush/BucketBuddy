@@ -119,33 +119,33 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
 
       {/* Basic Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Basic Information</h3>
-        
+        <h3 className="text-lg font-semibold hetzner-text">Basic Information</h3>
+
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium hetzner-text mb-2">
             Bucket Name (Display Name)
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
-            className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
+            className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150"
             placeholder="My Documents"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs hetzner-text-subtle mt-1">
             A friendly name to identify this bucket in your dashboard
           </p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium hetzner-text mb-2">
             Storage Provider
           </label>
           <select
             value={formData.provider}
             onChange={(e) => handleInputChange("provider", e.target.value)}
-            className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-colors duration-150"
+            className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text focus:outline-none focus:border-red-500 transition-colors duration-150"
           >
             {S3_PROVIDERS.map((provider) => (
               <option key={provider.id} value={provider.id}>
@@ -158,18 +158,18 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
 
       {/* Connection Details */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Connection Details</h3>
-        
+        <h3 className="text-lg font-semibold hetzner-text">Connection Details</h3>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium hetzner-text mb-2">
               Region
             </label>
             <input
               type="text"
               value={formData.region}
               onChange={(e) => handleInputChange("region", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors duration-150"
               placeholder={selectedProvider?.defaultRegion}
               required
             />
@@ -177,14 +177,14 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
 
           {selectedProvider?.requiresEndpoint && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium hetzner-text mb-2">
                 Endpoint URL
               </label>
               <input
                 type="url"
                 value={formData.endpoint}
                 onChange={(e) => handleInputChange("endpoint", e.target.value)}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors duration-150"
                 placeholder={getProviderEndpoint(selectedProvider, formData.region)}
                 required
               />
@@ -193,18 +193,18 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium hetzner-text mb-2">
             Bucket Name (Actual Bucket)
           </label>
           <input
             type="text"
             value={formData.bucketName}
             onChange={(e) => handleInputChange("bucketName", e.target.value)}
-            className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
+            className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150"
             placeholder="my-actual-bucket-name"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs hetzner-text-subtle mt-1">
             The actual name of your bucket in the storage provider
           </p>
         </div>
@@ -212,24 +212,24 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
 
       {/* Credentials */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Access Credentials</h3>
-        
+        <h3 className="text-lg font-semibold hetzner-text">Access Credentials</h3>
+
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium hetzner-text mb-2">
             Access Key ID
           </label>
           <input
             type="text"
             value={formData.accessKey}
             onChange={(e) => handleInputChange("accessKey", e.target.value)}
-            className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
+            className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150"
             placeholder="Your access key ID"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
+          <label className="block text-sm font-medium hetzner-text mb-2">
             Secret Access Key
           </label>
           <div className="relative">
@@ -237,14 +237,14 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
               type={showSecretKey ? "text" : "password"}
               value={formData.secretKey}
               onChange={(e) => handleInputChange("secretKey", e.target.value)}
-              className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150 pr-10"
+              className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
               placeholder="Your secret access key"
               required
             />
             <button
               type="button"
               onClick={() => setShowSecretKey(!showSecretKey)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-white transition-colors duration-150"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center hetzner-text-muted hover:hetzner-text transition-colors duration-150"
             >
               {showSecretKey ? (
                 <EyeOff className="h-5 w-5" />
@@ -259,12 +259,12 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
       {/* Connection Test */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">Connection Test</h3>
+          <h3 className="text-lg font-semibold hetzner-text">Connection Test</h3>
           <button
             type="button"
             onClick={testConnection}
             disabled={connectionStatus.status === "testing"}
-            className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 disabled:text-black/50 rounded-lg transition-colors duration-150"
+            className="inline-flex items-center px-4 py-2 hetzner-btn-secondary disabled:opacity-50 rounded-lg transition-colors duration-150"
           >
             {connectionStatus.status === "testing" ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -348,18 +348,18 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
       </div>
 
       {/* Submit Button */}
-      <div className="flex items-center justify-end space-x-4 pt-6 border-t border-white/10">
+      <div className="flex items-center justify-end space-x-4 pt-6 border-t hetzner-border">
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="px-6 py-2 border border-white/20 text-gray-400 rounded-lg hover:bg-white/5 hover:text-white transition-colors duration-150"
+          className="px-6 py-2 hetzner-btn-secondary rounded-lg transition-colors duration-150"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || connectionStatus.status !== "success"}
-          className="inline-flex items-center px-6 py-2 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 disabled:text-black/50 rounded-lg transition-colors duration-150"
+          className="inline-flex items-center px-6 py-2 hetzner-btn-primary disabled:opacity-50 rounded-lg transition-colors duration-150"
         >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -144,8 +144,8 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
     return (
       <DashboardLayout>
         <div className="text-center py-12">
-          <h3 className="text-xl font-semibold text-white mb-2">Bucket not found</h3>
-          <Link href="/dashboard/buckets" className="text-blue-400 hover:text-blue-300">
+          <h3 className="text-xl font-semibold hetzner-text mb-2">Bucket not found</h3>
+          <Link href="/dashboard/buckets" className="hetzner-red hover:text-red-300">
             Back to buckets
           </Link>
         </div>
@@ -158,9 +158,9 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
       <DashboardLayout>
         <div className="text-center py-12">
           <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">Access Denied</h3>
-          <p className="text-gray-400 mb-4">Only bucket owners can access settings</p>
-          <Link href="/dashboard/buckets" className="text-blue-400 hover:text-blue-300">
+          <h3 className="text-xl font-semibold hetzner-text mb-2">Access Denied</h3>
+          <p className="hetzner-text-muted mb-4">Only bucket owners can access settings</p>
+          <Link href="/dashboard/buckets" className="hetzner-red hover:text-red-300">
             Back to buckets
           </Link>
         </div>
@@ -175,20 +175,20 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
         <div className="flex items-center space-x-4">
           <Link
             href={`/dashboard/buckets/${bucketId}`}
-            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-150"
+            className="p-2 hetzner-text-muted hover:hetzner-text hetzner-hover rounded-lg transition-colors duration-150"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">Bucket Settings</h1>
-            <p className="text-gray-400">
+            <h1 className="text-2xl font-bold hetzner-text">Bucket Settings</h1>
+            <p className="hetzner-text-muted">
               Configure settings for "{bucket.name}"
             </p>
           </div>
         </div>
 
         {/* Settings Form */}
-        <div className="bg-black border border-white/10 rounded-xl p-6">
+        <div className="hetzner-card rounded-xl p-6">
           <BucketForm
             onSubmit={handleUpdate}
             isSubmitting={isSubmitting}
@@ -197,18 +197,18 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-black border border-red-500/20 rounded-xl p-6">
+        <div className="hetzner-card border-red-500/20 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-red-400 mb-4">Danger Zone</h3>
           <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
             <div>
-              <h4 className="text-white font-medium">Delete Bucket</h4>
-              <p className="text-gray-400 text-sm">
+              <h4 className="hetzner-text font-medium">Delete Bucket</h4>
+              <p className="hetzner-text-muted text-sm">
                 Permanently delete this bucket configuration. This action cannot be undone.
               </p>
             </div>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-150"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 hetzner-text rounded-lg transition-colors duration-150"
             >
               <Trash2 className="h-4 w-4 mr-2 inline" />
               Delete

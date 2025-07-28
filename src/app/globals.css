@@ -1,46 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  /* Vercel-inspired color palette */
-  --background: #000000;
+  /* Hetzner-inspired color palette */
+  --background: #0f0f0f;
   --foreground: #ffffff;
-  --muted: #fafafa;
-  --muted-foreground: #737373;
-  --popover: #000000;
+  --muted: #2a2a2a;
+  --muted-foreground: #a1a1a1;
+  --popover: #1a1a1a;
   --popover-foreground: #ffffff;
-  --card: #000000;
+  --card: #1a1a1a;
   --card-foreground: #ffffff;
-  --border: #1a1a1a;
+  --border: #2a2a2a;
   --input: #1a1a1a;
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --secondary: #1a1a1a;
+  --primary: #ef4444;
+  --primary-foreground: #ffffff;
+  --secondary: #2a2a2a;
   --secondary-foreground: #ffffff;
-  --accent: #1a1a1a;
+  --accent: #ef4444;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --ring: #1a1a1a;
+  --ring: #ef4444;
   --radius: 0.5rem;
 
-  /* Subtle grays for modern UI */
+  /* Hetzner-inspired grays */
   --gray-50: #fafafa;
   --gray-100: #f5f5f5;
   --gray-200: #e5e5e5;
   --gray-300: #d4d4d4;
-  --gray-400: #a3a3a3;
+  --gray-400: #a1a1a1;
   --gray-500: #737373;
   --gray-600: #525252;
-  --gray-700: #404040;
-  --gray-800: #262626;
-  --gray-900: #171717;
-  --gray-950: #0a0a0a;
+  --gray-700: #3a3a3a;
+  --gray-800: #2a2a2a;
+  --gray-900: #1a1a1a;
+  --gray-950: #0f0f0f;
 
-  /* True blacks and subtle variations */
-  --black: #000000;
-  --black-light: #0a0a0a;
-  --black-lighter: #1a1a1a;
-  --black-lightest: #2a2a2a;
+  /* Hetzner color scheme */
+  --hetzner-bg: #0f0f0f;
+  --hetzner-card: #1a1a1a;
+  --hetzner-border: #2a2a2a;
+  --hetzner-hover: #2a2a2a;
+  --hetzner-red: #ef4444;
+  --hetzner-red-hover: #dc2626;
+  --hetzner-text: #ffffff;
+  --hetzner-text-muted: #a1a1a1;
+  --hetzner-text-subtle: #737373;
 }
 
 @theme inline {
@@ -72,8 +77,8 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--hetzner-bg);
+  color: var(--hetzner-text);
   font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
@@ -151,4 +156,107 @@ body {
 
 .input-base::placeholder {
   color: var(--muted-foreground);
+}
+
+/* Hetzner-inspired utility classes */
+.hetzner-bg {
+  background-color: var(--hetzner-bg);
+}
+
+.hetzner-card {
+  background-color: var(--hetzner-card);
+  border: 1px solid var(--hetzner-border);
+}
+
+.hetzner-border {
+  border-color: var(--hetzner-border);
+}
+
+.hetzner-hover:hover {
+  background-color: var(--hetzner-hover);
+}
+
+.hetzner-text {
+  color: var(--hetzner-text);
+}
+
+.hetzner-text-muted {
+  color: var(--hetzner-text-muted);
+}
+
+.hetzner-text-subtle {
+  color: var(--hetzner-text-subtle);
+}
+
+.hetzner-red {
+  color: var(--hetzner-red);
+}
+
+.hetzner-red-bg {
+  background-color: var(--hetzner-red);
+}
+
+.hetzner-red-bg:hover {
+  background-color: var(--hetzner-red-hover);
+}
+
+/* Enhanced sidebar styling */
+.hetzner-sidebar {
+  background-color: var(--hetzner-card);
+  border-right: 1px solid var(--hetzner-border);
+}
+
+.hetzner-sidebar-item {
+  color: var(--hetzner-text-muted);
+  transition: all 0.15s ease;
+}
+
+.hetzner-sidebar-item:hover {
+  color: var(--hetzner-text);
+  background-color: var(--hetzner-hover);
+}
+
+.hetzner-sidebar-item.active {
+  color: var(--hetzner-text);
+  background-color: var(--hetzner-hover);
+  border-right: 2px solid var(--hetzner-red);
+}
+
+/* Enhanced card styling */
+.hetzner-card-enhanced {
+  background-color: var(--hetzner-card);
+  border: 1px solid var(--hetzner-border);
+  border-radius: 0.5rem;
+  transition: all 0.15s ease;
+}
+
+.hetzner-card-enhanced:hover {
+  border-color: var(--hetzner-red);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+/* Enhanced button styling */
+.hetzner-btn-primary {
+  background-color: var(--hetzner-red);
+  color: var(--hetzner-text);
+  border: 1px solid var(--hetzner-red);
+  transition: all 0.15s ease;
+}
+
+.hetzner-btn-primary:hover {
+  background-color: var(--hetzner-red-hover);
+  border-color: var(--hetzner-red-hover);
+}
+
+.hetzner-btn-secondary {
+  background-color: transparent;
+  color: var(--hetzner-text-muted);
+  border: 1px solid var(--hetzner-border);
+  transition: all 0.15s ease;
+}
+
+.hetzner-btn-secondary:hover {
+  color: var(--hetzner-text);
+  border-color: var(--hetzner-red);
+  background-color: var(--hetzner-hover);
 }

@@ -245,7 +245,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
 
   if (loading) {
     return (
-      <div className="bg-black border border-white/10 rounded-lg p-6">
+      <div className="hetzner-card rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
             <div className="h-6 w-32 bg-white/5 rounded animate-pulse"></div>
@@ -263,7 +263,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
   }
 
   return (
-    <div className="bg-black border border-white/10 rounded-lg px-4 py-2">
+    <div className="hetzner-card rounded-lg px-4 py-2">
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-4">
@@ -286,7 +286,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
               placeholder="Search files..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150 w-full md:w-64"
+              className="pl-10 pr-4 py-2 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 w-full md:w-64"
             />
           </div>
 
@@ -295,7 +295,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="flex-1 md:flex-none px-3 py-2 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-colors duration-150"
+              className="flex-1 md:flex-none px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text focus:outline-none focus:border-red-500 transition-colors duration-150"
             >
               <option value="all">All Files</option>
               <option value="image">Images</option>
@@ -314,7 +314,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                 setSortBy(sort as any);
                 setSortOrder(order as any);
               }}
-              className="flex-1 md:flex-none px-3 py-2 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-colors duration-150"
+              className="flex-1 md:flex-none px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text focus:outline-none focus:border-red-500 transition-colors duration-150"
             >
               <option value="name-asc">Name A-Z</option>
               <option value="name-desc">Name Z-A</option>
@@ -365,7 +365,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           {permissions?.canWrite && (
             <button
               onClick={() => setShowUpload(true)}
-              className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150"
+              className="inline-flex items-center px-4 py-2 hetzner-btn-primary rounded-lg transition-colors duration-150"
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload
@@ -389,9 +389,9 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
 
       {/* Files Header */}
       <div className="flex items-center space-x-2 mb-2">
-        <Files className="h-4 w-4 text-white" />
-        <h2 className="text-base font-semibold text-white">Files</h2>
-        <span className="text-xs text-gray-500">
+        <Files className="h-4 w-4 hetzner-red" />
+        <h2 className="text-base font-semibold hetzner-text">Files</h2>
+        <span className="text-xs hetzner-text-muted">
           ({filteredAndSortedObjects.length} items)
         </span>
       </div>
@@ -399,11 +399,11 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
       {/* File List */}
       {filteredAndSortedObjects.length === 0 ? (
         <div className="text-center py-8">
-          <Folder className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-          <h3 className="text-base font-medium text-white mb-2">
+          <Folder className="h-12 w-12 hetzner-text-muted mx-auto mb-3" />
+          <h3 className="text-base font-medium hetzner-text mb-2">
             {searchQuery ? "No files found" : "This folder is empty"}
           </h3>
-          <p className="text-gray-500 mb-4 text-sm">
+          <p className="hetzner-text-muted mb-4 text-sm">
             {searchQuery
               ? `No files match "${searchQuery}"`
               : "Upload files to get started"
@@ -412,7 +412,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           {!searchQuery && permissions?.canWrite && (
             <button
               onClick={() => setShowUpload(true)}
-              className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150"
+              className="inline-flex items-center px-4 py-2 hetzner-btn-primary rounded-lg transition-colors duration-150"
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload Files
@@ -504,8 +504,8 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                     key={object.key}
                     className={`group relative p-6 border rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:shadow-lg ${
                       isSelected
-                        ? "border-blue-500/40 bg-blue-500/10 shadow-blue-500/20"
-                        : "border-white/10 hover:border-white/30 hover:bg-white/5"
+                        ? "border-red-500/40 bg-red-500/10 shadow-red-500/20"
+                        : "hetzner-border hover:border-red-500/50 hetzner-hover"
                     }`}
                     onClick={() => {
                       if (object.isFolder) {

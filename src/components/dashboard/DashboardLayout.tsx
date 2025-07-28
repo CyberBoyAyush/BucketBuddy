@@ -27,15 +27,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen hetzner-bg">
       {/* Top navigation */}
-      <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-white/10">
+      <div className="sticky top-0 z-40 hetzner-card backdrop-blur-md border-b hetzner-border">
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-8">
             {/* Logo */}
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <Cloud className="h-7 w-7 text-white" />
-              <span className="text-lg font-semibold text-white">S3R2UI</span>
+              <Cloud className="h-7 w-7 hetzner-red" />
+              <span className="text-lg font-semibold hetzner-text">S3R2UI</span>
             </Link>
 
             {/* Bucket Selector */}
@@ -46,30 +46,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-3 text-sm rounded-lg focus:outline-none hover:bg-white/5 px-2 py-1.5 transition-colors duration-150"
+              className="flex items-center space-x-3 text-sm rounded-lg focus:outline-none hetzner-hover px-2 py-1.5 transition-colors duration-150"
             >
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                  <span className="text-black font-medium text-sm">
+                <div className="w-8 h-8 hetzner-red-bg rounded-full flex items-center justify-center">
+                  <span className="hetzner-text font-medium text-sm">
                     {session?.user.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <span className="text-white font-medium hidden sm:block">
+                <span className="hetzner-text font-medium hidden sm:block">
                   {session?.user.name}
                 </span>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <ChevronDown className="h-4 w-4 hetzner-text-muted" />
               </div>
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-black border border-white/10 rounded-lg shadow-xl py-2 z-50">
-                <div className="px-4 py-3 border-b border-white/10">
-                  <p className="text-sm text-white font-medium">{session?.user.name}</p>
-                  <p className="text-sm text-gray-500">{session?.user.email}</p>
+              <div className="absolute right-0 mt-2 w-56 hetzner-card rounded-lg shadow-xl py-2 z-50">
+                <div className="px-4 py-3 border-b hetzner-border">
+                  <p className="text-sm hetzner-text font-medium">{session?.user.name}</p>
+                  <p className="text-sm hetzner-text-muted">{session?.user.email}</p>
                 </div>
                 <Link
                   href="/dashboard/settings"
-                  className="flex items-center px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-150"
+                  className="flex items-center px-4 py-2.5 text-sm hetzner-text-muted hetzner-hover transition-colors duration-150"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   <Settings className="mr-3 h-4 w-4" />
@@ -77,7 +77,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center w-full text-left px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-150"
+                  className="flex items-center w-full text-left px-4 py-2.5 text-sm hetzner-text-muted hetzner-hover transition-colors duration-150"
                 >
                   <LogOut className="mr-3 h-4 w-4" />
                   Sign out
@@ -89,7 +89,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Page content */}
-      <main className="p-4 sm:p-6 lg:p-8">
+      <main className="p-4 sm:p-6 lg:p-8 hetzner-bg">
         {children}
       </main>
     </div>

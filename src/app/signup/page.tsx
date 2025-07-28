@@ -54,18 +54,18 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen hetzner-bg flex items-center justify-center p-4">
       <div className="max-w-sm w-full space-y-8">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <Cloud className="h-8 w-8 text-white" />
-            <span className="text-xl font-semibold text-white">S3R2UI</span>
+            <Cloud className="h-8 w-8 hetzner-red" />
+            <span className="text-xl font-semibold hetzner-text">S3R2UI</span>
           </Link>
-          <h2 className="text-2xl font-bold text-white mb-2">Create your account</h2>
-          <p className="text-gray-500">Get started with your cloud storage management</p>
+          <h2 className="text-2xl font-bold hetzner-text mb-2">Create your account</h2>
+          <p className="hetzner-text-muted">Get started with your cloud storage management</p>
         </div>
 
-        <div className="bg-black border border-white/10 rounded-lg p-8">
+        <div className="hetzner-card rounded-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
@@ -74,7 +74,7 @@ export default function SignupPage() {
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
+              <label htmlFor="name" className="block text-sm font-medium hetzner-text mb-2">
                 Full name
               </label>
               <input
@@ -85,13 +85,13 @@ export default function SignupPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
+                className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150"
                 placeholder="Enter your full name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+              <label htmlFor="email" className="block text-sm font-medium hetzner-text mb-2">
                 Email address
               </label>
               <input
@@ -102,13 +102,13 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
+                className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150"
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
+              <label htmlFor="password" className="block text-sm font-medium hetzner-text mb-2">
                 Password
               </label>
               <div className="relative">
@@ -120,13 +120,13 @@ export default function SignupPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150 pr-10"
+                  className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
                   placeholder="Create a password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-white transition-colors duration-150"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hetzner-text-muted hover:hetzner-text transition-colors duration-150"
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -135,13 +135,13 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs hetzner-text-muted mt-1">
                 Must be at least 8 characters long
               </p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium hetzner-text mb-2">
                 Confirm password
               </label>
               <div className="relative">
@@ -153,13 +153,13 @@ export default function SignupPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150 pr-10"
+                  className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
                   placeholder="Confirm your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-white transition-colors duration-150"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center hetzner-text-muted hover:hetzner-text transition-colors duration-150"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -176,15 +176,15 @@ export default function SignupPage() {
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-white focus:ring-white/20 border-white/20 rounded bg-black"
+                className="h-4 w-4 hetzner-red focus:ring-red-500/20 hetzner-border rounded hetzner-card"
               />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-400">
+              <label htmlFor="terms" className="ml-2 block text-sm hetzner-text-muted">
                 I agree to the{" "}
-                <Link href="/terms" className="text-white hover:text-gray-300 transition-colors duration-150">
+                <Link href="/terms" className="hetzner-text hover:hetzner-red transition-colors duration-150">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-white hover:text-gray-300 transition-colors duration-150">
+                <Link href="/privacy" className="hetzner-text hover:hetzner-red transition-colors duration-150">
                   Privacy Policy
                 </Link>
               </label>
@@ -193,7 +193,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-medium text-black bg-white hover:bg-gray-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-medium hetzner-btn-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -204,11 +204,11 @@ export default function SignupPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-500">
+            <p className="hetzner-text-muted">
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-white hover:text-gray-300 transition-colors duration-150"
+                className="hetzner-text hover:hetzner-red transition-colors duration-150"
               >
                 Sign in
               </Link>
