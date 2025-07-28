@@ -5,16 +5,16 @@
 export interface AppError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   statusCode?: number;
 }
 
 export class S3R2UIError extends Error {
   public code: string;
   public statusCode: number;
-  public details?: any;
+  public details?: Record<string, unknown>;
 
-  constructor(code: string, message: string, statusCode = 500, details?: any) {
+  constructor(code: string, message: string, statusCode = 500, details?: Record<string, unknown>) {
     super(message);
     this.name = 'S3R2UIError';
     this.code = code;
@@ -92,7 +92,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
 /**
  * Parse and normalize errors from different sources
  */
-export function parseError(error: any): AppError {
+export function parseError(error: unknown): AppError {
   // If it's already our custom error
   if (error instanceof S3R2UIError) {
     return {
@@ -113,7 +113,9 @@ export function parseError(error: any): AppError {
   }
 
   // Handle timeout errors
-  if (error.name === 'AbortError' || error.message.includes('timeout')) {
+  if (error && typeof error === 'object' &&
+      (('name' in error && error.name === 'AbortError') ||
+       ('message' in error && typeof error.message === 'string' && error.message.includes('timeout')))) {
     return {
       code: ERROR_CODES.TIMEOUT,
       message: ERROR_MESSAGES[ERROR_CODES.TIMEOUT],
@@ -122,8 +124,9 @@ export function parseError(error: any): AppError {
   }
 
   // Handle HTTP response errors
-  if (error.status || error.statusCode) {
-    const statusCode = error.status || error.statusCode;
+  if (error && typeof error === 'object' &&
+      ('status' in error || 'statusCode' in error)) {
+    const statusCode = ('status' in error ? error.status : 'statusCode' in error ? error.statusCode : 500) as number;
     
     switch (statusCode) {
       case 401:
@@ -160,7 +163,8 @@ export function parseError(error: any): AppError {
   }
 
   // Handle AWS SDK errors
-  if (error.name && error.name.includes('AWS')) {
+  if (error && typeof error === 'object' && 'name' in error &&
+      typeof error.name === 'string' && error.name.includes('AWS')) {
     if (error.name === 'NoSuchBucket') {
       return {
         code: ERROR_CODES.BUCKET_NOT_FOUND,
@@ -169,15 +173,16 @@ export function parseError(error: any): AppError {
       };
     }
     
-    if (error.name === 'AccessDenied') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'AccessDenied') {
       return {
         code: ERROR_CODES.BUCKET_ACCESS_DENIED,
         message: ERROR_MESSAGES[ERROR_CODES.BUCKET_ACCESS_DENIED],
         statusCode: 403,
       };
     }
-    
-    if (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch') {
+
+    if (error && typeof error === 'object' && 'name' in error &&
+        (error.name === 'InvalidAccessKeyId' || error.name === 'SignatureDoesNotMatch')) {
       return {
         code: ERROR_CODES.INVALID_CREDENTIALS,
         message: ERROR_MESSAGES[ERROR_CODES.INVALID_CREDENTIALS],
@@ -187,18 +192,22 @@ export function parseError(error: any): AppError {
   }
 
   // Generic error fallback
+  const errorMessage = (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string')
+    ? error.message
+    : ERROR_MESSAGES[ERROR_CODES.UNKNOWN_ERROR];
+
   return {
     code: ERROR_CODES.UNKNOWN_ERROR,
-    message: error.message || ERROR_MESSAGES[ERROR_CODES.UNKNOWN_ERROR],
+    message: errorMessage,
     statusCode: 500,
-    details: error,
+    details: error as Record<string, unknown>,
   };
 }
 
 /**
  * Log errors with context
  */
-export function logError(error: any, context?: string) {
+export function logError(error: unknown, context?: string) {
   const parsedError = parseError(error);
   
   console.error(`[S3R2UI Error]${context ? ` ${context}:` : ''}`, {

@@ -41,7 +41,11 @@ export default function UserSettingsPage() {
         id: session.user.id,
         name: session.user.name || "",
         email: session.user.email || "",
-        createdAt: session.user.createdAt || new Date().toISOString(),
+        createdAt: session.user.createdAt ?
+          (session.user.createdAt instanceof Date ?
+            session.user.createdAt.toISOString() :
+            session.user.createdAt) :
+          new Date().toISOString(),
       };
       setProfile(userProfile);
       setFormData({

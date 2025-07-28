@@ -294,7 +294,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
             {/* File Type Filter */}
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
+              onChange={(e) => setFilterType(e.target.value as "all" | "image" | "video" | "audio" | "document" | "code" | "archive")}
               className="flex-1 md:flex-none px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text focus:outline-none focus:border-red-500 transition-colors duration-150"
             >
               <option value="all">All Files</option>
@@ -311,8 +311,8 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
               value={`${sortBy}-${sortOrder}`}
               onChange={(e) => {
                 const [sort, order] = e.target.value.split("-");
-                setSortBy(sort as any);
-                setSortOrder(order as any);
+                setSortBy(sort as "name" | "size" | "date");
+                setSortOrder(order as "asc" | "desc");
               }}
               className="flex-1 md:flex-none px-3 py-2 hetzner-card hetzner-border rounded-lg hetzner-text focus:outline-none focus:border-red-500 transition-colors duration-150"
             >

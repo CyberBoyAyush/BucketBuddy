@@ -7,6 +7,9 @@ if (!ENCRYPTION_KEY) {
   throw new Error('ENCRYPTION_KEY environment variable is required');
 }
 
+// Type assertion since we've checked it exists
+const encryptionKey: string = ENCRYPTION_KEY;
+
 /**
  * Encrypts a string using AES-256 encryption
  * @param text - The text to encrypt
@@ -14,7 +17,7 @@ if (!ENCRYPTION_KEY) {
  */
 export function encrypt(text: string): string {
   try {
-    const encrypted = CryptoJS.AES.encrypt(text, ENCRYPTION_KEY).toString();
+    const encrypted = CryptoJS.AES.encrypt(text, encryptionKey).toString();
     return encrypted;
   } catch (error) {
     console.error('Encryption error:', error);
@@ -29,7 +32,7 @@ export function encrypt(text: string): string {
  */
 export function decrypt(encryptedText: string): string {
   try {
-    const decrypted = CryptoJS.AES.decrypt(encryptedText, ENCRYPTION_KEY);
+    const decrypted = CryptoJS.AES.decrypt(encryptedText, encryptionKey);
     const originalText = decrypted.toString(CryptoJS.enc.Utf8);
     
     if (!originalText) {

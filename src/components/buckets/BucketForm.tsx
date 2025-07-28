@@ -4,14 +4,24 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff, Loader2, CheckCircle, XCircle, Info } from "lucide-react";
 import { S3_PROVIDERS, getProviderById, getProviderEndpoint } from "@/lib/s3-providers";
 
+interface BucketFormData {
+  name: string;
+  provider: string;
+  region: string;
+  endpoint: string;
+  accessKey: string;
+  secretKey: string;
+  bucketName: string;
+}
+
 interface BucketFormProps {
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: BucketFormData) => Promise<void>;
   isSubmitting: boolean;
-  initialData?: any;
+  initialData?: Partial<BucketFormData>;
 }
 
 export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BucketFormData>({
     name: "",
     provider: "aws",
     region: "us-east-1",

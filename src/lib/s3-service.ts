@@ -40,7 +40,7 @@ export class S3Service {
   constructor(config: S3Config) {
     this.bucketName = config.bucketName;
     
-    const clientConfig: any = {
+    const clientConfig: Record<string, unknown> = {
       region: config.region,
       credentials: {
         accessKeyId: config.accessKey,

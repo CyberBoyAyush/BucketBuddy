@@ -146,7 +146,7 @@ export async function PUT(
     });
 
     try {
-      await testService.listObjects("", 1); // Test with minimal request
+      await testService.listObjects("", undefined, 1); // Test with minimal request
     } catch (error) {
       return NextResponse.json(
         { error: "Failed to connect to bucket. Please check your credentials and configuration." },

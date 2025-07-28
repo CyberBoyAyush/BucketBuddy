@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
-import bcrypt from "bcryptjs";
 
 export async function PUT(request: NextRequest) {
   try {
@@ -33,43 +31,26 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Get user with password hash
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-      },
-    });
+    try {
+      // Use Better Auth's changePassword method
+      await auth.api.changePassword({
+        body: {
+          currentPassword,
+          newPassword,
+        },
+        headers: await headers(),
+      });
+    } catch (error: any) {
+      // Handle Better Auth specific errors
+      if (error.message?.includes("Invalid password") || error.message?.includes("incorrect")) {
+        return NextResponse.json(
+          { error: "Current password is incorrect" },
+          { status: 400 }
+        );
+      }
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      throw error; // Re-throw if it's not a password validation error
     }
-
-    // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      return NextResponse.json(
-        { error: "Current password is incorrect" },
-        { status: 400 }
-      );
-    }
-
-    // Hash new password
-    const saltRounds = 12;
-    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-
-    // Update password
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        password: hashedNewPassword,
-      },
-    });
 
     return NextResponse.json({ 
       message: "Password updated successfully" 
