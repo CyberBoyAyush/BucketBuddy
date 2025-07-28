@@ -81,7 +81,7 @@ export function NavbarBucketSelector() {
 
   if (loading) {
     return (
-      <div className="h-10 w-48 bg-gray-700 rounded-lg animate-pulse"></div>
+      <div className="h-9 w-48 bg-white/5 rounded-lg animate-pulse"></div>
     );
   }
 
@@ -89,31 +89,31 @@ export function NavbarBucketSelector() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+        className="flex items-center space-x-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors duration-150 border border-white/10"
       >
-        <Database className="h-5 w-5 text-gray-400" />
-        <span className="text-white font-medium">
+        <Database className="h-4 w-4 text-gray-400" />
+        <span className="text-white font-medium text-sm">
           {selectedBucket ? selectedBucket.name : "Select Bucket"}
         </span>
-        <ChevronDown className="h-4 w-4 text-gray-400" />
+        <ChevronDown className="h-4 w-4 text-gray-500" />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50">
-          <div className="px-3 py-2 border-b border-gray-700">
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Your Buckets</p>
+        <div className="absolute top-full left-0 mt-2 w-72 bg-black border border-white/10 rounded-lg shadow-xl py-2 z-50">
+          <div className="px-4 py-3 border-b border-white/10">
+            <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Your Buckets</p>
           </div>
-          
+
           {buckets.length === 0 ? (
-            <div className="px-3 py-4 text-center">
-              <Database className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm">No buckets configured</p>
+            <div className="px-4 py-6 text-center">
+              <Database className="h-8 w-8 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm mb-3">No buckets configured</p>
               <Link
                 href="/dashboard/buckets/add"
-                className="inline-flex items-center mt-2 text-blue-400 hover:text-blue-300 text-sm"
+                className="inline-flex items-center text-white hover:text-gray-300 text-sm transition-colors duration-150"
                 onClick={() => setIsOpen(false)}
               >
-                <Plus className="h-4 w-4 mr-1" />
+                <Plus className="h-4 w-4 mr-2" />
                 Add your first bucket
               </Link>
             </div>
@@ -127,32 +127,32 @@ export function NavbarBucketSelector() {
                     setSelectedBucket(bucket);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-700 transition-colors ${
-                    selectedBucket?.id === bucket.id ? "bg-gray-700" : ""
+                  className={`w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-white/5 transition-colors duration-150 ${
+                    selectedBucket?.id === bucket.id ? "bg-white/5" : ""
                   }`}
                 >
                   <span className="text-lg">{getProviderIcon(bucket.provider)}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{bucket.name}</p>
-                    <p className="text-gray-400 text-xs truncate">
+                    <p className="text-white font-medium truncate text-sm">{bucket.name}</p>
+                    <p className="text-gray-500 text-xs truncate">
                       {bucket.provider.toUpperCase()} • {bucket.memberCount} member{bucket.memberCount !== 1 ? 's' : ''}
                     </p>
                   </div>
                   {selectedBucket?.id === bucket.id && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
                   )}
                 </Link>
               ))}
             </div>
           )}
 
-          <div className="border-t border-gray-700 mt-2 pt-2">
+          <div className="border-t border-white/10 mt-2 pt-2">
             {/* Bucket-specific actions */}
             {selectedBucket && permissions?.canAdmin && (
               <>
                 <Link
                   href={`/dashboard/buckets/${selectedBucket.id}/settings`}
-                  className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                  className="flex items-center space-x-3 px-4 py-2.5 text-gray-500 hover:text-white hover:bg-white/5 transition-colors duration-150"
                   onClick={() => setIsOpen(false)}
                 >
                   <Settings className="h-4 w-4" />
@@ -161,21 +161,21 @@ export function NavbarBucketSelector() {
 
                 <Link
                   href={`/dashboard/buckets/${selectedBucket.id}/members`}
-                  className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                  className="flex items-center space-x-3 px-4 py-2.5 text-gray-500 hover:text-white hover:bg-white/5 transition-colors duration-150"
                   onClick={() => setIsOpen(false)}
                 >
                   <Users className="h-4 w-4" />
                   <span className="text-sm">Manage Members</span>
                 </Link>
 
-                <div className="border-t border-gray-700 my-2" />
+                <div className="border-t border-white/10 my-2" />
               </>
             )}
 
             {/* Global actions */}
             <Link
               href="/dashboard/buckets/add"
-              className="flex items-center space-x-2 px-3 py-2 text-blue-400 hover:text-blue-300 hover:bg-gray-700 transition-colors"
+              className="flex items-center space-x-3 px-4 py-2.5 text-white hover:text-gray-300 hover:bg-white/5 transition-colors duration-150"
               onClick={() => setIsOpen(false)}
             >
               <Plus className="h-4 w-4" />
@@ -184,7 +184,7 @@ export function NavbarBucketSelector() {
 
             <Link
               href="/dashboard/buckets"
-              className="flex items-center space-x-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+              className="flex items-center space-x-3 px-4 py-2.5 text-gray-500 hover:text-white hover:bg-white/5 transition-colors duration-150"
               onClick={() => setIsOpen(false)}
             >
               <Database className="h-4 w-4" />

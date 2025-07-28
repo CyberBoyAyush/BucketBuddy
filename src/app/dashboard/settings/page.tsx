@@ -187,7 +187,7 @@ export default function UserSettingsPage() {
         </div>
 
         {/* Profile Information */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+        <div className="bg-black border border-white/10 rounded-xl p-6">
           <div className="flex items-center space-x-3 mb-6">
             <User className="h-6 w-6 text-blue-500" />
             <h2 className="text-xl font-semibold text-white">Profile Information</h2>
@@ -195,28 +195,28 @@ export default function UserSettingsPage() {
 
           <form onSubmit={handleProfileUpdate} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Full Name
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
                 placeholder="Enter your full name"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Email Address
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
                 placeholder="Enter your email address"
                 required
               />
@@ -226,7 +226,7 @@ export default function UserSettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-6 py-2 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 disabled:text-black/50 rounded-lg transition-colors duration-150"
               >
                 {saving ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -240,7 +240,7 @@ export default function UserSettingsPage() {
         </div>
 
         {/* Change Password */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+        <div className="bg-black border border-white/10 rounded-xl p-6">
           <div className="flex items-center space-x-3 mb-6">
             <Lock className="h-6 w-6 text-yellow-500" />
             <h2 className="text-xl font-semibold text-white">Change Password</h2>
@@ -248,7 +248,7 @@ export default function UserSettingsPage() {
 
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Current Password
               </label>
               <div className="relative">
@@ -256,14 +256,14 @@ export default function UserSettingsPage() {
                   type={showCurrentPassword ? "text" : "password"}
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                  className="w-full px-3 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 pr-10 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
                   placeholder="Enter your current password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-150"
                 >
                   {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -271,7 +271,7 @@ export default function UserSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 New Password
               </label>
               <div className="relative">
@@ -279,7 +279,7 @@ export default function UserSettingsPage() {
                   type={showNewPassword ? "text" : "password"}
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                  className="w-full px-3 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 pr-10 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
                   placeholder="Enter your new password"
                   required
                 />
@@ -297,7 +297,7 @@ export default function UserSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Confirm New Password
               </label>
               <div className="relative">
@@ -305,14 +305,14 @@ export default function UserSettingsPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                  className="w-full px-3 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 pr-10 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150"
                   placeholder="Confirm your new password"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-150"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -323,7 +323,7 @@ export default function UserSettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center px-6 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-600/50 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-6 py-2 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 disabled:text-black/50 rounded-lg transition-colors duration-150"
               >
                 {saving ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -337,7 +337,7 @@ export default function UserSettingsPage() {
         </div>
 
         {/* Account Information */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+        <div className="bg-black border border-white/10 rounded-xl p-6">
           <div className="flex items-center space-x-3 mb-6">
             <CheckCircle className="h-6 w-6 text-green-500" />
             <h2 className="text-xl font-semibold text-white">Account Information</h2>
@@ -345,19 +345,19 @@ export default function UserSettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 User ID
               </label>
-              <div className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-400 text-sm font-mono">
+              <div className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-gray-300 text-sm font-mono">
                 {profile.id}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Member Since
               </label>
-              <div className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-gray-400">
+              <div className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-gray-300">
                 {new Date(profile.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',

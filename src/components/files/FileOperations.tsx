@@ -162,13 +162,13 @@ export function FileOperations({ bucketId, fileKey, fileName, canWrite, onDelete
               setNewName(fileName);
             }
           }}
-          className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-2 py-1 bg-black border border-white/20 rounded text-white text-sm focus:outline-none focus:border-white/40 transition-colors duration-150"
           autoFocus
         />
         <button
           onClick={handleRename}
           disabled={loading}
-          className="px-2 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white text-xs rounded transition-colors"
+          className="px-2 py-1 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 text-xs rounded transition-colors duration-150"
         >
           Save
         </button>
@@ -177,7 +177,7 @@ export function FileOperations({ bucketId, fileKey, fileName, canWrite, onDelete
             setShowRename(false);
             setNewName(fileName);
           }}
-          className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+          className="px-2 py-1 bg-white/10 hover:bg-white/20 text-white text-xs rounded transition-colors duration-150"
         >
           Cancel
         </button>
@@ -189,22 +189,22 @@ export function FileOperations({ bucketId, fileKey, fileName, canWrite, onDelete
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
+        className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-150"
       >
         <MoreVertical className="h-4 w-4" />
       </button>
 
       {showMenu && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-1 z-50">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-black border border-white/10 rounded-lg shadow-xl py-2 z-50">
           <button
             onClick={handleDownload}
             disabled={loading}
-            className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+            className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-150"
           >
             <Download className="h-4 w-4" />
             <span>Download</span>
           </button>
-          
+
           {canWrite && (
             <>
               <button
@@ -212,18 +212,18 @@ export function FileOperations({ bucketId, fileKey, fileName, canWrite, onDelete
                   setShowRename(true);
                   setShowMenu(false);
                 }}
-                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-150"
               >
                 <Edit3 className="h-4 w-4" />
                 <span>Rename</span>
               </button>
 
-              <div className="border-t border-gray-700 my-1" />
+              <div className="border-t border-white/10 my-2" />
 
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors duration-150"
               >
                 <Trash2 className="h-4 w-4" />
                 <span>Delete</span>

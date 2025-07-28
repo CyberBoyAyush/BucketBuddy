@@ -8,7 +8,16 @@ import {
   Search,
   Grid,
   List,
-  X
+  X,
+  ChevronUp,
+  ChevronDown,
+  Files,
+  Image as ImageIcon,
+  FileText,
+  Video,
+  Music,
+  Archive,
+  Code
 } from "lucide-react";
 import { formatFileSize, formatDate, getFileType } from "@/lib/utils";
 import { FileUpload } from "./FileUpload";
@@ -27,6 +36,44 @@ interface FileBrowserProps {
   bucketId: string;
 }
 
+// Helper function to get file type icon
+const getFileTypeIcon = (fileName: string, isFolder: boolean = false) => {
+  if (isFolder) {
+    return <Folder className="h-5 w-5 text-blue-500" />;
+  }
+
+  const fileType = getFileType(fileName);
+  const iconClass = "h-5 w-5";
+
+  switch (fileType) {
+    case "image":
+      return <ImageIcon className={`${iconClass} text-green-500`} />;
+    case "video":
+      return <Video className={`${iconClass} text-red-500`} />;
+    case "audio":
+      return <Music className={`${iconClass} text-purple-500`} />;
+    case "document":
+      return <FileText className={`${iconClass} text-blue-500`} />;
+    case "code":
+      return <Code className={`${iconClass} text-yellow-500`} />;
+    case "archive":
+      return <Archive className={`${iconClass} text-orange-500`} />;
+    default:
+      return <File className={`${iconClass} text-gray-500`} />;
+  }
+};
+
+// Helper function to check if file is an image
+const isImageFile = (fileName: string) => {
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
+  return imageExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+};
+
+// Helper function to generate image preview URL
+const getImagePreviewUrl = (bucketId: string, objectKey: string) => {
+  return `/api/buckets/${bucketId}/files/preview?key=${encodeURIComponent(objectKey)}`;
+};
+
 interface BucketPermissions {
   role: string;
   isOwner: boolean;
@@ -34,6 +81,37 @@ interface BucketPermissions {
   canWrite: boolean;
   canAdmin: boolean;
 }
+
+// Sortable header component
+const SortableHeader = ({
+  label,
+  sortKey,
+  currentSort,
+  currentOrder,
+  onSort
+}: {
+  label: string;
+  sortKey: string;
+  currentSort: string;
+  currentOrder: string;
+  onSort: (key: string) => void;
+}) => {
+  const isActive = currentSort === sortKey;
+
+  return (
+    <button
+      onClick={() => onSort(sortKey)}
+      className="flex items-center space-x-1 text-left hover:text-white transition-colors duration-150"
+    >
+      <span className="font-medium">{label}</span>
+      {isActive && (
+        currentOrder === "asc" ?
+          <ChevronUp className="h-4 w-4" /> :
+          <ChevronDown className="h-4 w-4" />
+      )}
+    </button>
+  );
+};
 
 export function FileBrowser({ bucketId }: FileBrowserProps) {
   const [objects, setObjects] = useState<S3Object[]>([]);
@@ -99,6 +177,15 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
     setSelectedObjects(new Set());
   };
 
+  const handleSort = (key: string) => {
+    if (sortBy === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(key as "name" | "size" | "date");
+      setSortOrder("asc");
+    }
+  };
+
 
 
   const filteredAndSortedObjects = objects
@@ -154,42 +241,20 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
     setSelectedObjects(newSelection);
   };
 
-  const getFileIcon = (fileName: string, isFolder: boolean) => {
-    if (isFolder) {
-      return <Folder className="h-5 w-5 text-blue-500" />;
-    }
-    
-    const fileType = getFileType(fileName);
-    const iconClass = "h-5 w-5";
-    
-    switch (fileType) {
-      case "image":
-        return <File className={`${iconClass} text-green-500`} />;
-      case "video":
-        return <File className={`${iconClass} text-purple-500`} />;
-      case "audio":
-        return <File className={`${iconClass} text-pink-500`} />;
-      case "document":
-        return <File className={`${iconClass} text-red-500`} />;
-      case "code":
-        return <File className={`${iconClass} text-yellow-500`} />;
-      default:
-        return <File className={`${iconClass} text-gray-500`} />;
-    }
-  };
+
 
   if (loading) {
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+      <div className="bg-black border border-white/10 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <div className="h-6 w-32 bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-6 w-32 bg-white/5 rounded animate-pulse"></div>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="h-10 w-64 bg-gray-700 rounded animate-pulse"></div>
-            <div className="h-10 w-32 bg-gray-700 rounded animate-pulse"></div>
-            <div className="h-10 w-40 bg-gray-700 rounded animate-pulse"></div>
-            <div className="h-10 w-24 bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-10 w-64 bg-white/5 rounded animate-pulse"></div>
+            <div className="h-10 w-32 bg-white/5 rounded animate-pulse"></div>
+            <div className="h-10 w-40 bg-white/5 rounded animate-pulse"></div>
+            <div className="h-10 w-24 bg-white/5 rounded animate-pulse"></div>
           </div>
         </div>
         <SkeletonTable />
@@ -198,9 +263,9 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
   }
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+    <div className="bg-black border border-white/10 rounded-lg px-4 py-2">
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-4">
           {/* Current folder indicator */}
           {currentPath && (
@@ -212,16 +277,16 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-2">
+        <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-2">
           {/* Search */}
           <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <input
               type="text"
               placeholder="Search files..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full md:w-64"
+              className="pl-10 pr-4 py-2 bg-black border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-white/40 transition-colors duration-150 w-full md:w-64"
             />
           </div>
 
@@ -230,7 +295,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as any)}
-              className="flex-1 md:flex-none px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 md:flex-none px-3 py-2 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-colors duration-150"
             >
               <option value="all">All Files</option>
               <option value="image">Images</option>
@@ -249,7 +314,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                 setSortBy(sort as any);
                 setSortOrder(order as any);
               }}
-              className="flex-1 md:flex-none px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 md:flex-none px-3 py-2 bg-black border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40 transition-colors duration-150"
             >
               <option value="name-asc">Name A-Z</option>
               <option value="name-desc">Name Z-A</option>
@@ -268,7 +333,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                   setSortBy("name");
                   setSortOrder("asc");
                 }}
-                className="inline-flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors duration-150"
               >
                 <X className="h-4 w-4 md:mr-1" />
                 <span className="hidden md:inline">Clear</span>
@@ -277,19 +342,19 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           </div>
 
           {/* View Mode Toggle - Hidden on mobile */}
-          <div className="hidden md:flex items-center bg-gray-700 rounded-lg p-1">
+          <div className="hidden md:flex items-center bg-white/5 rounded-lg p-1">
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 rounded ${
-                viewMode === "list" ? "bg-gray-600 text-white" : "text-gray-400 hover:text-white"
+              className={`p-2 rounded transition-colors duration-150 ${
+                viewMode === "list" ? "bg-white/20 text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
               }`}
             >
               <List className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded ${
-                viewMode === "grid" ? "bg-gray-600 text-white" : "text-gray-400 hover:text-white"
+              className={`p-2 rounded transition-colors duration-150 ${
+                viewMode === "grid" ? "bg-white/20 text-white" : "text-gray-400 hover:text-white hover:bg-white/10"
               }`}
             >
               <Grid className="h-4 w-4" />
@@ -300,7 +365,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           {permissions?.canWrite && (
             <button
               onClick={() => setShowUpload(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150"
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload
@@ -322,23 +387,32 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
         />
       )}
 
+      {/* Files Header */}
+      <div className="flex items-center space-x-2 mb-2">
+        <Files className="h-4 w-4 text-white" />
+        <h2 className="text-base font-semibold text-white">Files</h2>
+        <span className="text-xs text-gray-500">
+          ({filteredAndSortedObjects.length} items)
+        </span>
+      </div>
+
       {/* File List */}
       {filteredAndSortedObjects.length === 0 ? (
-        <div className="text-center py-12">
-          <Folder className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">
+        <div className="text-center py-8">
+          <Folder className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+          <h3 className="text-base font-medium text-white mb-2">
             {searchQuery ? "No files found" : "This folder is empty"}
           </h3>
-          <p className="text-gray-400 mb-4">
-            {searchQuery 
+          <p className="text-gray-500 mb-4 text-sm">
+            {searchQuery
               ? `No files match "${searchQuery}"`
               : "Upload files to get started"
             }
           </p>
-          {!searchQuery && (
+          {!searchQuery && permissions?.canWrite && (
             <button
               onClick={() => setShowUpload(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150"
             >
               <Upload className="h-4 w-4 mr-2" />
               Upload Files
@@ -346,123 +420,275 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           )}
         </div>
       ) : (
-        <div className={viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" : "space-y-1"}>
-          {/* Back button for subfolders */}
-          {currentPath && viewMode === "list" && (
-            <button
-              onClick={navigateUp}
-              className="flex items-center space-x-3 p-3 hover:bg-gray-700 rounded-lg transition-colors w-full text-left"
-            >
-              <Folder className="h-5 w-5 text-blue-500" />
-              <span className="text-white">.. (Back)</span>
-            </button>
-          )}
-          
-          {filteredAndSortedObjects.slice(0, displayLimit).map((object) => {
-            const fileName = object.key.split("/").pop() || "";
-            const isSelected = selectedObjects.has(object.key);
-            
-            if (viewMode === "grid") {
-              return (
-                <div
-                  key={object.key}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors touch-manipulation ${
-                    isSelected
-                      ? "border-blue-500 bg-blue-500/10"
-                      : "border-gray-600 hover:border-gray-500 hover:bg-gray-700/50"
-                  }`}
-                  onClick={() => {
-                    if (object.isFolder) {
-                      navigateToFolder(object.key);
+        <div>
+          {/* List View Header */}
+          {viewMode === "list" && (
+            <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-white/10 text-sm text-gray-400">
+              <div className="col-span-1">
+                <input
+                  type="checkbox"
+                  checked={selectedObjects.size === filteredAndSortedObjects.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedObjects(new Set(filteredAndSortedObjects.map(obj => obj.key)));
                     } else {
-                      toggleSelection(object.key);
+                      setSelectedObjects(new Set());
                     }
                   }}
-                >
-                  <div className="text-center">
-                    <div className="mb-2 flex justify-center">
-                      {getFileIcon(fileName, object.isFolder)}
-                    </div>
-                    <p className="text-white text-sm font-medium truncate" title={fileName}>
-                      {fileName}
-                    </p>
-                    {!object.isFolder && (
-                      <p className="text-gray-400 text-xs mt-1">
-                        {formatFileSize(object.size)}
-                      </p>
-                    )}
-                  </div>
+                  className="rounded border-white/20 bg-black text-white focus:ring-white/20"
+                />
+              </div>
+              <div className="col-span-5">
+                <SortableHeader
+                  label="Name"
+                  sortKey="name"
+                  currentSort={sortBy}
+                  currentOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </div>
+              <div className="col-span-2">
+                <SortableHeader
+                  label="Type"
+                  sortKey="type"
+                  currentSort={sortBy}
+                  currentOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </div>
+              <div className="col-span-2">
+                <SortableHeader
+                  label="Size"
+                  sortKey="size"
+                  currentSort={sortBy}
+                  currentOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </div>
+              <div className="col-span-2">
+                <SortableHeader
+                  label="Modified"
+                  sortKey="date"
+                  currentSort={sortBy}
+                  currentOrder={sortOrder}
+                  onSort={handleSort}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* File Items */}
+          <div className={viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-2" : "space-y-0"}>
+            {/* Back button for subfolders */}
+            {currentPath && viewMode === "list" && (
+              <div className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-white/5 rounded-lg transition-colors duration-150 cursor-pointer"
+                   onClick={navigateUp}>
+                <div className="col-span-1"></div>
+                <div className="col-span-5 flex items-center space-x-3">
+                  <Folder className="h-5 w-5 text-blue-500" />
+                  <span className="text-white font-medium">.. (Back)</span>
                 </div>
-              );
+                <div className="col-span-6"></div>
+              </div>
+            )}
+
+            {filteredAndSortedObjects.slice(0, displayLimit).map((object) => {
+              const fileName = object.key.split("/").pop() || "";
+              const isSelected = selectedObjects.has(object.key);
+              const fileType = getFileType(fileName);
+              const isImage = isImageFile(fileName);
+
+              if (viewMode === "grid") {
+                return (
+                  <div
+                    key={object.key}
+                    className={`group relative p-6 border rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:shadow-lg ${
+                      isSelected
+                        ? "border-blue-500/40 bg-blue-500/10 shadow-blue-500/20"
+                        : "border-white/10 hover:border-white/30 hover:bg-white/5"
+                    }`}
+                    onClick={() => {
+                      if (object.isFolder) {
+                        navigateToFolder(object.key);
+                      } else {
+                        toggleSelection(object.key);
+                      }
+                    }}
+                  >
+                    {/* Selection checkbox */}
+                    <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          toggleSelection(object.key);
+                        }}
+                        className="w-4 h-4 rounded border-white/30 bg-black/50 text-blue-500 focus:ring-blue-500/50 focus:ring-2"
+                      />
+                    </div>
+
+                    {/* File operations */}
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <FileOperations
+                        bucketId={bucketId}
+                        fileKey={object.key}
+                        fileName={fileName}
+                        canWrite={permissions?.canWrite || false}
+                        onDelete={() => {
+                          setSelectedObjects(prev => {
+                            const newSet = new Set(prev);
+                            newSet.delete(object.key);
+                            return newSet;
+                          });
+                          fetchObjects();
+                        }}
+                        onRename={() => {
+                          fetchObjects();
+                        }}
+                      />
+                    </div>
+
+                    <div className="text-center">
+                      {/* Preview/Icon */}
+                      <div className="mb-4 flex justify-center">
+                        {isImage && !object.isFolder ? (
+                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center shadow-inner">
+                            <img
+                              src={getImagePreviewUrl(bucketId, object.key)}
+                              alt={fileName}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to icon if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = '';
+                                  const iconDiv = document.createElement('div');
+                                  iconDiv.className = 'flex items-center justify-center w-full h-full';
+                                  parent.appendChild(iconDiv);
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-xl bg-white/5 flex items-center justify-center shadow-inner">
+                            <div className="scale-125">
+                              {getFileTypeIcon(fileName, object.isFolder)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* File info */}
+                      <div className="space-y-2">
+                        <p className="text-white text-sm font-medium truncate leading-tight" title={fileName}>
+                          {fileName}
+                        </p>
+                        {!object.isFolder && (
+                          <div className="text-xs text-gray-400 space-y-1">
+                            <p className="font-medium">{formatFileSize(object.size)}</p>
+                            <p className="capitalize text-gray-500">{fileType}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
             }
-            
+
+            // List view
             return (
               <div
                 key={object.key}
-                className={`flex items-center justify-between p-4 md:p-3 hover:bg-gray-700 rounded-lg transition-colors touch-manipulation ${
+                className={`grid grid-cols-12 gap-4 px-4 py-3 hover:bg-white/5 rounded-lg transition-colors duration-150 cursor-pointer ${
                   isSelected ? "bg-blue-500/10" : ""
                 }`}
+                onClick={() => {
+                  if (object.isFolder) {
+                    navigateToFolder(object.key);
+                  } else {
+                    toggleSelection(object.key);
+                  }
+                }}
               >
-                <div 
-                  className="flex items-center space-x-3 flex-1 cursor-pointer"
-                  onClick={() => {
-                    if (object.isFolder) {
-                      navigateToFolder(object.key);
-                    } else {
-                      toggleSelection(object.key);
-                    }
-                  }}
-                >
+                {/* Checkbox */}
+                <div className="col-span-1 flex items-center">
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={() => toggleSelection(object.key)}
-                    className="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
-                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleSelection(object.key);
+                    }}
+                    className="rounded border-white/20 bg-black text-white focus:ring-white/20"
                   />
-                  {getFileIcon(fileName, object.isFolder)}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{fileName}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-400">
-                      {!object.isFolder && <span>{formatFileSize(object.size)}</span>}
-                      <span>{formatDate(new Date(object.lastModified))}</span>
-                    </div>
+                </div>
+
+                {/* Name with icon */}
+                <div className="col-span-5 flex items-center space-x-3 min-w-0">
+                  {getFileTypeIcon(fileName, object.isFolder)}
+                  <span className="text-white font-medium truncate" title={fileName}>
+                    {fileName}
+                  </span>
+                </div>
+
+                {/* Type */}
+                <div className="col-span-2 flex items-center">
+                  <span className="text-gray-400 text-sm capitalize">
+                    {object.isFolder ? "Folder" : fileType}
+                  </span>
+                </div>
+
+                {/* Size */}
+                <div className="col-span-2 flex items-center">
+                  <span className="text-gray-400 text-sm">
+                    {object.isFolder ? "—" : formatFileSize(object.size)}
+                  </span>
+                </div>
+
+                {/* Modified */}
+                <div className="col-span-2 flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">
+                    {formatDate(new Date(object.lastModified))}
+                  </span>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <FileOperations
+                      bucketId={bucketId}
+                      fileKey={object.key}
+                      fileName={fileName}
+                      canWrite={permissions?.canWrite || false}
+                      onDelete={() => {
+                        setSelectedObjects(prev => {
+                          const newSet = new Set(prev);
+                          newSet.delete(object.key);
+                          return newSet;
+                        });
+                        fetchObjects();
+                      }}
+                      onRename={() => {
+                        fetchObjects();
+                      }}
+                    />
                   </div>
                 </div>
-                
-                {!object.isFolder && (
-                  <FileOperations
-                    bucketId={bucketId}
-                    fileKey={object.key}
-                    fileName={fileName}
-                    canWrite={permissions?.canWrite || false}
-                    onDelete={() => {
-                      setObjects(prev => prev.filter(obj => obj.key !== object.key));
-                    }}
-                    onRename={(newName) => {
-                      setObjects(prev => prev.map(obj =>
-                        obj.key === object.key
-                          ? { ...obj, key: object.key.replace(fileName, newName) }
-                          : obj
-                      ));
-                    }}
-                  />
-                )}
               </div>
             );
           })}
 
           {/* Load More Button */}
           {filteredAndSortedObjects.length > displayLimit && (
-            <div className="text-center py-6">
+            <div className="text-center py-4 mt-4">
               <button
                 onClick={() => setDisplayLimit(prev => prev + 50)}
-                className="inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors duration-150"
               >
                 Load More ({filteredAndSortedObjects.length - displayLimit} remaining)
               </button>
             </div>
           )}
+        </div>
         </div>
       )}
     </div>

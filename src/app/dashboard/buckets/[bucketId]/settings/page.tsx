@@ -132,8 +132,8 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
       <DashboardLayout>
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-700 rounded w-1/3 mb-4"></div>
-            <div className="h-96 bg-gray-700 rounded"></div>
+            <div className="h-8 bg-white/5 rounded w-1/3 mb-4"></div>
+            <div className="h-96 bg-white/5 rounded"></div>
           </div>
         </div>
       </DashboardLayout>
@@ -175,7 +175,7 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
         <div className="flex items-center space-x-4">
           <Link
             href={`/dashboard/buckets/${bucketId}`}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-150"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
@@ -188,16 +188,16 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
         </div>
 
         {/* Settings Form */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-          <BucketForm 
-            onSubmit={handleUpdate} 
+        <div className="bg-black border border-white/10 rounded-xl p-6">
+          <BucketForm
+            onSubmit={handleUpdate}
             isSubmitting={isSubmitting}
             initialData={bucket}
           />
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-gray-800 border border-red-500/20 rounded-xl p-6">
+        <div className="bg-black border border-red-500/20 rounded-xl p-6">
           <h3 className="text-lg font-semibold text-red-400 mb-4">Danger Zone</h3>
           <div className="flex items-center justify-between p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
             <div>
@@ -208,7 +208,7 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
             </div>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-150"
             >
               <Trash2 className="h-4 w-4 mr-2 inline" />
               Delete

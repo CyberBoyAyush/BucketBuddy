@@ -43,21 +43,21 @@ export default function DashboardPage() {
         {/* Main Content */}
         {buckets.length === 0 ? (
           /* No Buckets - Getting Started */
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 text-center">
-            <Database className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+          <div className="bg-black border border-white/10 rounded-lg p-8 text-center">
+            <Database className="h-16 w-16 text-gray-600 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Get Started with S3R2UI</h2>
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
               Connect your first S3 or R2 bucket to start managing your cloud storage files with ease.
             </p>
             <div className="space-y-4">
               <Link
                 href="/dashboard/buckets/add"
-                className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-lg font-medium"
+                className="inline-flex items-center px-6 py-3 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150 text-lg font-medium"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Add Your First Bucket
               </Link>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-600">
                 Supports AWS S3, Cloudflare R2, DigitalOcean Spaces, and more
               </div>
             </div>
@@ -67,15 +67,15 @@ export default function DashboardPage() {
           <FileBrowser bucketId={selectedBucket.id} />
         ) : (
           /* No Bucket Selected */
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-8 text-center">
-            <Database className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+          <div className="bg-black border border-white/10 rounded-lg p-8 text-center">
+            <Database className="h-16 w-16 text-gray-600 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Select a Bucket</h2>
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
               Choose a bucket from the dropdown in the navbar to start managing your files.
             </p>
             <Link
               href="/dashboard/buckets"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-lg font-medium"
+              className="inline-flex items-center px-6 py-3 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150 text-lg font-medium"
             >
               <Database className="h-5 w-5 mr-2" />
               Manage All Buckets

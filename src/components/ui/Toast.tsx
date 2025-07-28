@@ -107,36 +107,36 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
   const getBackgroundColor = () => {
     switch (toast.type) {
       case "success":
-        return "bg-green-500/10 border-green-500/20";
+        return "bg-black border-green-500/20 shadow-lg shadow-green-500/5";
       case "error":
-        return "bg-red-500/10 border-red-500/20";
+        return "bg-black border-red-500/20 shadow-lg shadow-red-500/5";
       case "warning":
-        return "bg-yellow-500/10 border-yellow-500/20";
+        return "bg-black border-yellow-500/20 shadow-lg shadow-yellow-500/5";
       default:
-        return "bg-blue-500/10 border-blue-500/20";
+        return "bg-black border-blue-500/20 shadow-lg shadow-blue-500/5";
     }
   };
 
   return (
     <div
       className={cn(
-        "flex items-start space-x-3 p-4 rounded-lg border backdrop-blur-sm transition-all duration-300 min-w-80 max-w-md",
+        "flex items-start space-x-3 p-4 rounded-lg border backdrop-blur-sm transition-all duration-200 ease-out min-w-80 max-w-md",
         getBackgroundColor(),
-        isVisible 
-          ? "translate-x-0 opacity-100" 
-          : "translate-x-full opacity-0"
+        isVisible
+          ? "translate-x-0 opacity-100 scale-100"
+          : "translate-x-full opacity-0 scale-95"
       )}
     >
       {getIcon()}
       <div className="flex-1 min-w-0">
         <h4 className="text-sm font-medium text-white">{toast.title}</h4>
         {toast.message && (
-          <p className="text-sm text-gray-300 mt-1">{toast.message}</p>
+          <p className="text-sm text-gray-400 mt-1">{toast.message}</p>
         )}
       </div>
       <button
         onClick={handleRemove}
-        className="text-gray-400 hover:text-white transition-colors"
+        className="text-gray-500 hover:text-white transition-colors duration-150 p-1 rounded-md hover:bg-white/5"
       >
         <X className="h-4 w-4" />
       </button>

@@ -178,13 +178,13 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
   const getStatusColor = (status: UploadFile["status"]) => {
     switch (status) {
       case "uploading":
-        return "border-blue-500 bg-blue-500/10";
+        return "border-blue-500/20 bg-blue-500/5";
       case "success":
-        return "border-green-500 bg-green-500/10";
+        return "border-green-500/20 bg-green-500/5";
       case "error":
-        return "border-red-500 bg-red-500/10";
+        return "border-red-500/20 bg-red-500/5";
       default:
-        return "border-gray-600 bg-gray-700/50";
+        return "border-white/10 bg-white/5";
     }
   };
 
@@ -193,14 +193,14 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
   const failedUploads = uploadFiles.filter(f => f.status === "error").length;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 border border-gray-700 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-black border border-white/10 rounded-lg max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">Upload Files</h2>
+        <div className="flex items-center justify-between p-6 border-b border-white/10">
+          <h2 className="text-lg font-semibold text-white">Upload Files</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-150"
           >
             <X className="h-5 w-5" />
           </button>
@@ -211,32 +211,32 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
           {uploadFiles.length === 0 ? (
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${
+              className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all duration-200 ${
                 isDragActive
-                  ? "border-blue-500 bg-blue-500/10 scale-[1.02]"
-                  : "border-gray-600 hover:border-gray-500 hover:bg-gray-700/20"
+                  ? "border-white/40 bg-white/5 scale-[1.01]"
+                  : "border-white/20 hover:border-white/30 hover:bg-white/[0.02]"
               }`}
             >
               <input {...getInputProps()} />
               <div className="flex flex-col items-center">
-                <div className={`p-4 rounded-full mb-4 transition-colors ${
-                  isDragActive ? "bg-blue-500/20" : "bg-gray-700/50"
+                <div className={`p-4 rounded-lg mb-6 transition-colors ${
+                  isDragActive ? "bg-white/10" : "bg-white/5"
                 }`}>
-                  <Upload className={`h-12 w-12 transition-colors ${
-                    isDragActive ? "text-blue-400" : "text-gray-500"
+                  <Upload className={`h-10 w-10 transition-colors ${
+                    isDragActive ? "text-white" : "text-gray-500"
                   }`} />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-lg font-semibold text-white mb-2">
                   {isDragActive ? "Drop files here" : "Upload files"}
                 </h3>
-                <p className="text-gray-400 mb-6 max-w-sm">
+                <p className="text-gray-500 mb-8 max-w-sm leading-relaxed">
                   Drag and drop your files here, or click the button below to browse and select files from your computer
                 </p>
-                <button className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
-                  <Upload className="h-5 w-5 mr-2" />
+                <button className="inline-flex items-center px-6 py-2.5 bg-white text-black hover:bg-gray-100 rounded-lg transition-colors duration-150 font-medium">
+                  <Upload className="h-4 w-4 mr-2" />
                   Choose Files
                 </button>
-                <p className="text-gray-500 text-xs mt-3">
+                <p className="text-gray-600 text-xs mt-4">
                   Supports all file types • Max 100MB per file
                 </p>
               </div>
@@ -244,41 +244,41 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
           ) : (
             <div className="space-y-4">
               {/* Progress Summary */}
-              <div className="bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-xl p-5 border border-gray-600/50">
-                <div className="flex items-center justify-between mb-3">
+              <div className="bg-white/5 rounded-lg p-5 border border-white/10">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="text-white font-semibold">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-white font-medium">
                         Upload Progress
                       </span>
                     </div>
-                    <span className="text-gray-400 text-sm">
+                    <span className="text-gray-500 text-sm">
                       ({successfulUploads}/{totalFiles} files)
                     </span>
                   </div>
                   <div className="flex items-center space-x-4 text-sm">
                     {successfulUploads > 0 && (
                       <span className="text-green-400 flex items-center">
-                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <CheckCircle className="h-3 w-3 mr-1" />
                         {successfulUploads} completed
                       </span>
                     )}
                     {failedUploads > 0 && (
                       <span className="text-red-400 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
+                        <AlertCircle className="h-3 w-3 mr-1" />
                         {failedUploads} failed
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="w-full bg-gray-600 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-blue-400 h-3 rounded-full transition-all duration-500 ease-out"
+                    className="bg-white h-2 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${(successfulUploads / totalFiles) * 100}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-gray-400 mt-2">
+                <div className="flex justify-between text-xs text-gray-500 mt-3">
                   <span>{Math.round((successfulUploads / totalFiles) * 100)}% complete</span>
                   <span>{totalFiles - successfulUploads} remaining</span>
                 </div>
@@ -299,20 +299,20 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
                         <p className="text-white font-medium truncate">
                           {uploadFile.file.name}
                         </p>
-                        <div className="flex items-center space-x-2 text-sm text-gray-400">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
                           <span>{formatFileSize(uploadFile.file.size)}</span>
                           <span>•</span>
                           <span className="capitalize">{getFileType(uploadFile.file.name)}</span>
                         </div>
                         {uploadFile.status === "uploading" && (
                           <div className="mt-2">
-                            <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
                               <span>Uploading...</span>
                               <span>{uploadFile.progress}%</span>
                             </div>
-                            <div className="w-full bg-gray-600 rounded-full h-1">
+                            <div className="w-full bg-white/10 rounded-full h-1">
                               <div
-                                className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                                className="bg-white h-1 rounded-full transition-all duration-300"
                                 style={{ width: `${uploadFile.progress}%` }}
                               />
                             </div>
@@ -345,19 +345,19 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
               {/* Add More Files */}
               <div
                 {...getRootProps()}
-                className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                className={`border border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors duration-150 ${
                   isDragActive
-                    ? "border-blue-500 bg-blue-500/5"
-                    : "border-gray-600 hover:border-gray-500 hover:bg-gray-700/20"
+                    ? "border-white/40 bg-white/5"
+                    : "border-white/20 hover:border-white/30 hover:bg-white/[0.02]"
                 }`}
               >
                 <input {...getInputProps()} />
                 <div className="flex flex-col items-center">
-                  <Upload className="h-8 w-8 text-gray-500 mb-2" />
+                  <Upload className="h-6 w-6 text-gray-500 mb-2" />
                   <p className="text-gray-400 text-sm font-medium mb-1">
                     {isDragActive ? "Drop files here" : "Add more files"}
                   </p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-gray-600 text-xs">
                     Drag and drop or click to browse
                   </p>
                 </div>
@@ -368,21 +368,21 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
 
         {/* Footer */}
         {uploadFiles.length > 0 && (
-          <div className="flex items-center justify-between p-6 border-t border-gray-700">
-            <div className="text-sm text-gray-400">
+          <div className="flex items-center justify-between p-6 border-t border-white/10">
+            <div className="text-sm text-gray-500">
               {totalFiles} file{totalFiles !== 1 ? 's' : ''} selected
             </div>
             <div className="flex items-center space-x-3">
               <button
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 border border-white/20 text-gray-400 rounded-lg hover:bg-white/5 hover:text-white transition-colors duration-150"
               >
                 Cancel
               </button>
               <button
                 onClick={uploadAll}
                 disabled={uploading || uploadFiles.filter(f => f.status === "pending").length === 0}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-white text-black hover:bg-gray-100 disabled:bg-white/50 disabled:text-black/50 rounded-lg transition-colors duration-150"
               >
                 {uploading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
