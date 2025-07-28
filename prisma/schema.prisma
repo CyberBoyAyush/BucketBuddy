@@ -25,6 +25,11 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  // Bucket relationships
+  ownedBuckets  Bucket[]
+  bucketMemberships BucketMember[]
+  bucketInvitations BucketMember[] @relation("BucketInviter")
+
   @@unique([email])
   @@map("user")
 }
@@ -72,4 +77,42 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Bucket {
+  id                String   @id @default(cuid())
+  name              String
+  provider          String   // AWS, Cloudflare, DigitalOcean, etc.
+  region            String
+  endpoint          String?  // Custom endpoint for S3-compatible services
+  encryptedAccessKey String  // AES-256 encrypted
+  encryptedSecretKey String  // AES-256 encrypted
+  bucketName        String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  ownerId           String
+  owner             User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Bucket members for sharing
+  members           BucketMember[]
+
+  @@unique([ownerId, bucketName, provider])
+  @@map("bucket")
+}
+
+model BucketMember {
+  id        String   @id @default(cuid())
+  bucketId  String
+  userId    String
+  role      String   @default("viewer") // viewer, editor, admin
+  invitedBy String
+  invitedAt DateTime @default(now())
+  acceptedAt DateTime?
+
+  bucket    Bucket   @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inviter   User     @relation("BucketInviter", fields: [invitedBy], references: [id])
+
+  @@unique([bucketId, userId])
+  @@map("bucket_member")
 }
