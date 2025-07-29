@@ -148,6 +148,42 @@ export async function POST(
         return NextResponse.json({ metadata });
       }
 
+      case "create-folder": {
+        const { folderName, path } = body;
+
+        if (!folderName) {
+          return NextResponse.json(
+            { error: "Folder name is required" },
+            { status: 400 }
+          );
+        }
+
+        // Check if user has write permission
+        if (!hasPermission(userRole, "write")) {
+          return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        }
+
+        // Sanitize folder name
+        const sanitizedFolderName = folderName.replace(/[^a-zA-Z0-9\-_\s]/g, '').trim();
+        if (!sanitizedFolderName) {
+          return NextResponse.json(
+            { error: "Invalid folder name" },
+            { status: 400 }
+          );
+        }
+
+        // Create folder key with trailing slash
+        const folderKey = path ? `${path}${sanitizedFolderName}/` : `${sanitizedFolderName}/`;
+
+        // Create an empty object to represent the folder
+        await s3Service.createFolder(folderKey);
+
+        return NextResponse.json({
+          message: "Folder created successfully",
+          folderKey,
+        });
+      }
+
       default:
         return NextResponse.json(
           { error: "Invalid operation" },

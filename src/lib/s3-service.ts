@@ -180,6 +180,28 @@ export class S3Service {
   }
 
   /**
+   * Create a folder by uploading an empty object with trailing slash
+   */
+  async createFolder(folderKey: string): Promise<void> {
+    try {
+      // Ensure the folder key ends with a slash
+      const key = folderKey.endsWith('/') ? folderKey : `${folderKey}/`;
+
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: '', // Empty body for folder
+        ContentType: 'application/x-directory',
+      });
+
+      await this.client.send(command);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      throw new Error('Failed to create folder');
+    }
+  }
+
+  /**
    * Copy/rename an object
    */
   async copyObject(sourceKey: string, destinationKey: string): Promise<void> {
