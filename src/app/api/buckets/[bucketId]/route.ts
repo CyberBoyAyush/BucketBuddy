@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { encrypt } from "@/lib/encryption";
+import { encryptCredentialsWithPassword, hashPassword } from "@/lib/encryption";
 import { S3Service } from "@/lib/s3-service";
 import { headers } from "next/headers";
 
@@ -19,6 +19,8 @@ export async function GET(
     }
 
     const { bucketId } = await params;
+    console.log('Looking for bucket:', bucketId);
+
     const bucket = await prisma.bucket.findFirst({
       where: {
         id: bucketId,
@@ -60,8 +62,11 @@ export async function GET(
     });
 
     if (!bucket) {
+      console.log('Bucket not found:', bucketId);
       return NextResponse.json({ error: "Bucket not found" }, { status: 404 });
     }
+
+    console.log('Bucket found:', bucket.id, bucket.name);
 
     // Remove encrypted credentials from response
     const safeBucket = {
@@ -110,6 +115,7 @@ export async function PUT(
       accessKey,
       secretKey,
       bucketName,
+      encryptionPassword,
     } = body;
     const { bucketId } = await params;
 
@@ -129,9 +135,9 @@ export async function PUT(
     }
 
     // Validate required fields
-    if (!name || !provider || !region || !accessKey || !secretKey || !bucketName) {
+    if (!name || !provider || !region || !accessKey || !secretKey || !bucketName || !encryptionPassword) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields including encryption password" },
         { status: 400 }
       );
     }
@@ -154,9 +160,13 @@ export async function PUT(
       );
     }
 
-    // Encrypt credentials
-    const encryptedAccessKey = encrypt(accessKey);
-    const encryptedSecretKey = encrypt(secretKey);
+    // Encrypt credentials with password
+    const { encryptedAccessKey, encryptedSecretKey } = encryptCredentialsWithPassword(
+      accessKey,
+      secretKey,
+      encryptionPassword
+    );
+    const passwordHash = hashPassword(encryptionPassword);
 
     // Update bucket
     const updatedBucket = await prisma.bucket.update({
@@ -169,6 +179,7 @@ export async function PUT(
         bucketName,
         encryptedAccessKey,
         encryptedSecretKey,
+        passwordHash,
       },
       include: {
         owner: {

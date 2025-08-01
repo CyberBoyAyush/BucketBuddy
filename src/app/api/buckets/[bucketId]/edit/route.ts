@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { decrypt } from "@/lib/encryption";
+import { decryptCredentialsWithPassword } from "@/lib/encryption";
 import { headers } from "next/headers";
 
-export async function GET(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ bucketId: string }> }
 ) {
@@ -17,7 +17,16 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const body = await request.json();
+    const { password } = body;
     const { bucketId } = await params;
+
+    if (!password) {
+      return NextResponse.json(
+        { error: "Password is required to decrypt credentials" },
+        { status: 400 }
+      );
+    }
     
     // Only allow bucket owners to get edit data (includes credentials)
     const bucket = await prisma.bucket.findFirst({
@@ -34,23 +43,34 @@ export async function GET(
       );
     }
 
-    // Decrypt credentials for editing
-    const decryptedAccessKey = decrypt(bucket.encryptedAccessKey);
-    const decryptedSecretKey = decrypt(bucket.encryptedSecretKey);
+    // Decrypt credentials for editing with password
+    try {
+      const { accessKey, secretKey } = decryptCredentialsWithPassword(
+        bucket.encryptedAccessKey,
+        bucket.encryptedSecretKey,
+        password
+      );
 
-    // Return bucket data with decrypted credentials for editing
-    const editableBucket = {
-      id: bucket.id,
-      name: bucket.name,
-      provider: bucket.provider,
-      region: bucket.region,
-      endpoint: bucket.endpoint || "",
-      bucketName: bucket.bucketName,
-      accessKey: decryptedAccessKey,
-      secretKey: decryptedSecretKey,
-    };
+      // Return bucket data with decrypted credentials for editing
+      const editableBucket = {
+        id: bucket.id,
+        name: bucket.name,
+        provider: bucket.provider,
+        region: bucket.region,
+        endpoint: bucket.endpoint || "",
+        bucketName: bucket.bucketName,
+        accessKey,
+        secretKey,
+        encryptionPassword: password, // Include password for form
+      };
 
-    return NextResponse.json({ bucket: editableBucket });
+      return NextResponse.json({ bucket: editableBucket });
+    } catch (decryptError) {
+      return NextResponse.json(
+        { error: "Invalid password - unable to decrypt credentials" },
+        { status: 401 }
+      );
+    }
   } catch (error) {
     console.error("Error fetching bucket for editing:", error);
     return NextResponse.json(

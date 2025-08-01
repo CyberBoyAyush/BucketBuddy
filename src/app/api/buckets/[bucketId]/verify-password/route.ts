@@ -1,0 +1,99 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { verifyPassword, decryptCredentialsWithPassword } from "@/lib/encryption";
+import { headers } from "next/headers";
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ bucketId: string }> }
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { password } = body;
+    const { bucketId } = await params;
+
+    if (!password) {
+      return NextResponse.json(
+        { error: "Password is required" },
+        { status: 400 }
+      );
+    }
+
+    // Find bucket and check access
+    const bucket = await prisma.bucket.findFirst({
+      where: {
+        id: bucketId,
+        OR: [
+          { ownerId: session.user.id },
+          {
+            members: {
+              some: {
+                userId: session.user.id,
+                acceptedAt: { not: null },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (!bucket) {
+      return NextResponse.json({ error: "Bucket not found" }, { status: 404 });
+    }
+
+    // Verify password using stored hash if available, otherwise try decryption
+    if (bucket.passwordHash) {
+      console.log('Using password hash verification');
+      const isValidPassword = verifyPassword(password, bucket.passwordHash);
+      if (isValidPassword) {
+        return NextResponse.json({
+          success: true,
+          message: "Password verified successfully"
+        });
+      } else {
+        return NextResponse.json({
+          success: false,
+          error: "Invalid password"
+        }, { status: 401 });
+      }
+    } else {
+      // Fallback to decryption verification for buckets without password hash
+      console.log('Using decryption verification (no password hash found)');
+      try {
+        decryptCredentialsWithPassword(
+          bucket.encryptedAccessKey,
+          bucket.encryptedSecretKey,
+          password
+        );
+
+        console.log('Decryption verification successful');
+        return NextResponse.json({
+          success: true,
+          message: "Password verified successfully"
+        });
+      } catch (error) {
+        console.error('Decryption verification failed:', error);
+        return NextResponse.json({
+          success: false,
+          error: "Invalid password"
+        }, { status: 401 });
+      }
+    }
+
+  } catch (error) {
+    console.error("Error verifying password:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

@@ -21,13 +21,17 @@ import {
   Home,
   ChevronRight,
   Eye,
-  FolderPlus
+  FolderPlus,
+  RefreshCw
 } from "lucide-react";
 import { formatFileSize, formatDate, getFileType } from "@/lib/utils";
 import { FileUpload } from "./FileUpload";
 import { FileOperations } from "./FileOperations";
 import { NewFolder } from "./NewFolder";
 import { BulkOperations } from "./BulkOperations";
+import { PasswordPrompt } from "../buckets/PasswordPrompt";
+import { FilePreview } from "./FilePreview";
+import { getBucketPassword, storeBucketPassword, initializePasswordManager } from "@/lib/password-manager";
 
 interface S3Object {
   key: string;
@@ -81,9 +85,31 @@ const isImageFile = (fileName: string) => {
   return imageExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
 };
 
+// Helper function to check if file is previewable
+const isPreviewableFile = (fileName: string) => {
+  const previewableExtensions = [
+    // Images
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp',
+    // Documents
+    '.pdf',
+    // Videos
+    '.mp4', '.webm', '.ogg', '.mov', '.avi',
+    // Audio
+    '.mp3', '.wav', '.ogg', '.m4a', '.flac',
+    // Text
+    '.txt', '.md', '.json', '.xml', '.csv', '.log'
+  ];
+  return previewableExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+};
+
 // Helper function to generate image preview URL
-const getImagePreviewUrl = (bucketId: string, objectKey: string) => {
-  return `/api/buckets/${bucketId}/files/preview?key=${encodeURIComponent(objectKey)}`;
+const getImagePreviewUrl = (bucketId: string, objectKey: string, password?: string) => {
+  const params = new URLSearchParams();
+  params.append('key', objectKey);
+  if (password) {
+    params.append('password', password);
+  }
+  return `/api/buckets/${bucketId}/files/preview?${params}`;
 };
 
 // Helper function to extract display name from object key
@@ -195,24 +221,104 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
   const [filterType, setFilterType] = useState<"all" | "image" | "video" | "audio" | "document" | "code" | "archive">("all");
   const [displayLimit, setDisplayLimit] = useState(50); // Limit initial display for performance
   const [permissions, setPermissions] = useState<BucketPermissions | null>(null);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
+  const [bucketName, setBucketName] = useState("");
+  const [previewFile, setPreviewFile] = useState<S3Object | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
+    initializePasswordManager();
+    fetchBucketInfo();
     fetchObjects();
     fetchPermissions();
   }, [bucketId, currentPath]);
 
+  const fetchBucketInfo = async () => {
+    try {
+      const response = await fetch(`/api/buckets/${bucketId}`);
+      if (response.ok) {
+        const { bucket } = await response.json();
+        setBucketName(bucket.name);
+      }
+    } catch (error) {
+      console.error("Error fetching bucket info:", error);
+    }
+  };
+
+  const handlePasswordSubmit = async (password: string) => {
+    setIsVerifyingPassword(true);
+    setPasswordError("");
+
+    try {
+      console.log('Verifying password for bucket:', bucketId);
+      const response = await fetch(`/api/buckets/${bucketId}/verify-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      console.log('Password verification response:', response.status);
+
+      if (response.ok) {
+        console.log('Password verified successfully, storing locally');
+        // Store password locally and close prompt
+        storeBucketPassword(bucketId, password);
+        setShowPasswordPrompt(false);
+        // Retry fetching objects
+        fetchObjects();
+      } else {
+        const { error } = await response.json();
+        console.error('Password verification failed:', error);
+        setPasswordError(error || "Invalid password");
+      }
+    } catch (error) {
+      console.error('Password verification error:', error);
+      setPasswordError("Failed to verify password. Please try again.");
+    } finally {
+      setIsVerifyingPassword(false);
+    }
+  };
+
   const fetchObjects = async () => {
     setLoading(true);
     try {
+      // Check if we have a stored password for this bucket
+      const storedPassword = getBucketPassword(bucketId);
+
       const params = new URLSearchParams();
       if (currentPath) {
         params.append("prefix", currentPath);
       }
+      if (storedPassword) {
+        params.append("password", storedPassword);
+      }
 
       const response = await fetch(`/api/buckets/${bucketId}/files?${params}`);
+
+      if (response.status === 401 && !storedPassword) {
+        // Need password to access encrypted bucket
+        setShowPasswordPrompt(true);
+        setLoading(false);
+        return;
+      }
+
+      if (response.status === 401 && storedPassword) {
+        // Stored password is invalid, prompt for new one
+        setPasswordError("Stored password is invalid. Please enter the correct password.");
+        setShowPasswordPrompt(true);
+        setLoading(false);
+        return;
+      }
+
       if (response.ok) {
         const { objects } = await response.json();
         setObjects(objects);
+      } else {
+        console.error("Error fetching objects:", response.statusText);
       }
     } catch (error) {
       console.error("Error fetching objects:", error);
@@ -223,10 +329,18 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
 
   const fetchPermissions = async () => {
     try {
+      console.log('Fetching permissions for bucket:', bucketId);
       const response = await fetch(`/api/buckets/${bucketId}/permissions`);
+      console.log('Permissions response status:', response.status);
+
       if (response.ok) {
         const { permissions } = await response.json();
+        console.log('Permissions fetched:', permissions);
         setPermissions(permissions);
+      } else {
+        console.error('Failed to fetch permissions:', response.status, response.statusText);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error details:', errorData);
       }
     } catch (error) {
       console.error("Error fetching permissions:", error);
@@ -310,6 +424,20 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
     setSelectedObjects(newSelection);
   };
 
+  const handleFileDoubleClick = (object: S3Object) => {
+    if (object.isFolder) {
+      navigateToFolder(object.key);
+    } else if (isPreviewableFile(object.key)) {
+      setPreviewFile(object);
+      setShowPreview(true);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewFile(null);
+  };
+
 
 
   if (loading) {
@@ -362,114 +490,129 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
             />
           </div>
 
-          {/* Enhanced Controls */}
-          <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-3">
-            {/* Enhanced Search */}
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 group-focus-within:text-red-400 transition-colors duration-200" />
+          {/* Modern Controls */}
+          <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-4">
+            {/* Modern Search Bar */}
+            <div className="relative group flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-red-400 transition-colors duration-200" />
+              </div>
               <input
                 type="text"
                 placeholder="Search files and folders..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2.5 w-full md:w-72 bg-black/50 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-200"
+                className="block w-full pl-10 pr-4 py-3 bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-all duration-200 hover:bg-gray-900/80"
               />
-            </div>
-
-            {/* Enhanced Controls Group */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* File Type Filter */}
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as "all" | "image" | "video" | "audio" | "document" | "code" | "archive")}
-                className="px-3 py-2.5 bg-black/50 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-200 min-w-[120px]"
-              >
-                <option value="all">All Files</option>
-                <option value="image">Images</option>
-                <option value="video">Videos</option>
-                <option value="audio">Audio</option>
-                <option value="document">Documents</option>
-                <option value="code">Code</option>
-                <option value="archive">Archives</option>
-              </select>
-
-              {/* Sort Options */}
-              <select
-                value={`${sortBy}-${sortOrder}`}
-                onChange={(e) => {
-                  const [sort, order] = e.target.value.split("-");
-                  setSortBy(sort as "name" | "size" | "date");
-                  setSortOrder(order as "asc" | "desc");
-                }}
-                className="px-3 py-2.5 bg-black/50 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-200 min-w-[160px]"
-              >
-                <option value="name-asc">Name A-Z</option>
-                <option value="name-desc">Name Z-A</option>
-                <option value="size-asc">Size (Small to Large)</option>
-                <option value="size-desc">Size (Large to Small)</option>
-                <option value="date-asc">Date (Oldest First)</option>
-                <option value="date-desc">Date (Newest First)</option>
-              </select>
-
-              {/* Clear Filters */}
-              {(searchQuery || filterType !== "all" || sortBy !== "name" || sortOrder !== "asc") && (
+              {searchQuery && (
                 <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setFilterType("all");
-                    setSortBy("name");
-                    setSortOrder("asc");
-                  }}
-                  className="inline-flex items-center px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200 hover:scale-105"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <X className="h-4 w-4 md:mr-1" />
-                  <span className="hidden md:inline">Clear</span>
+                  <X className="h-4 w-4 text-gray-400 hover:text-white transition-colors duration-200" />
                 </button>
               )}
+            </div>
+
+            {/* Modern Filter Controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* File Type Filter */}
+              <div className="relative">
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value as "all" | "image" | "video" | "audio" | "document" | "code" | "archive")}
+                  className="appearance-none bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl px-4 py-3 pr-10 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-all duration-200 hover:bg-gray-900/80 cursor-pointer min-w-[130px]"
+                >
+                  <option value="all">All Files</option>
+                  <option value="image">Images</option>
+                  <option value="video">Videos</option>
+                  <option value="audio">Audio</option>
+                  <option value="document">Documents</option>
+                  <option value="code">Code</option>
+                  <option value="archive">Archives</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* Sort Options */}
+              <div className="relative">
+                <select
+                  value={`${sortBy}-${sortOrder}`}
+                  onChange={(e) => {
+                    const [sort, order] = e.target.value.split("-");
+                    setSortBy(sort as "name" | "size" | "date");
+                    setSortOrder(order as "asc" | "desc");
+                  }}
+                  className="appearance-none bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl px-4 py-3 pr-10 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-all duration-200 hover:bg-gray-900/80 cursor-pointer min-w-[140px]"
+                >
+                  <option value="name-asc">Name A-Z</option>
+                  <option value="name-desc">Name Z-A</option>
+                  <option value="size-asc">Size ↑</option>
+                  <option value="size-desc">Size ↓</option>
+                  <option value="date-asc">Date ↑</option>
+                  <option value="date-desc">Date ↓</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
 
               {/* View Mode Toggle */}
-              <div className="hidden md:flex items-center bg-black/50 border border-white/20 rounded-lg p-1">
+              <div className="hidden md:flex items-center bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-md transition-all duration-200 ${
+                  className={`p-2.5 rounded-lg transition-all duration-200 ${
                     viewMode === "list"
-                      ? "bg-red-500 text-white shadow-lg"
+                      ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
                       : "text-gray-400 hover:text-white hover:bg-white/10"
                   }`}
+                  title="List view"
                 >
                   <List className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-md transition-all duration-200 ${
+                  className={`p-2.5 rounded-lg transition-all duration-200 ${
                     viewMode === "grid"
-                      ? "bg-red-500 text-white shadow-lg"
+                      ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
                       : "text-gray-400 hover:text-white hover:bg-white/10"
                   }`}
+                  title="Grid view"
                 >
                   <Grid className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Action Buttons - Only show for users with write permissions */}
-              {permissions?.canWrite && (
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setShowNewFolder(true)}
-                    className="inline-flex items-center px-4 py-2.5 bg-blue-500 hover:bg-blue-600 hetzner-text rounded-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-blue-500/25"
-                  >
-                    <FolderPlus className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">New Folder</span>
-                  </button>
-                  <button
-                    onClick={() => setShowUpload(true)}
-                    className="inline-flex items-center px-4 py-2.5 hetzner-red-bg hover:hetzner-red-bg:hover hetzner-text rounded-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-red-500/25"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Upload</span>
-                  </button>
-                </div>
-              )}
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-2">
+                {/* Refresh Button */}
+                <button
+                  onClick={fetchObjects}
+                  disabled={loading}
+                  className="p-2.5 bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 hover:bg-gray-800/80 disabled:bg-gray-900/30 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-200 hover:scale-105"
+                  title="Refresh bucket contents"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+
+                {/* Write-only buttons */}
+                {permissions?.canWrite && (
+                  <>
+                    <button
+                      onClick={() => setShowNewFolder(true)}
+                      className="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-blue-600/25"
+                    >
+                      <FolderPlus className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">New Folder</span>
+                    </button>
+                    <button
+                      onClick={() => setShowUpload(true)}
+                      className="inline-flex items-center px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-red-600/25"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Upload</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -522,9 +665,10 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
           <div className="md:hidden">
             <button
               onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors duration-200"
+              className="p-2.5 bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 hover:bg-gray-800/80 rounded-xl transition-all duration-200"
+              title={`Switch to ${viewMode === "grid" ? "list" : "grid"} view`}
             >
-              {viewMode === "grid" ? <List className="h-5 w-5" /> : <Grid className="h-5 w-5" />}
+              {viewMode === "grid" ? <List className="h-5 w-5 text-white" /> : <Grid className="h-5 w-5 text-white" />}
             </button>
           </div>
         </div>
@@ -682,12 +826,11 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                           : "border-white/10 bg-gradient-to-br from-white/5 to-transparent hover:border-red-500/30 hover:shadow-lg hover:shadow-black/20"
                       }`}
                       onClick={() => {
-                        if (object.isFolder) {
-                          navigateToFolder(object.key);
-                        } else {
+                        if (!object.isFolder) {
                           toggleSelection(object.key);
                         }
                       }}
+                      onDoubleClick={() => handleFileDoubleClick(object)}
                     >
                       {/* Selection checkbox */}
                       <div className={`absolute top-3 left-3 transition-all duration-200 ${
@@ -703,6 +846,15 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                           className="w-4 h-4 rounded border-white/30 bg-black/50 text-red-500 focus:ring-red-500/50 focus:ring-2"
                         />
                       </div>
+
+                      {/* Preview indicator for previewable files */}
+                      {!object.isFolder && isPreviewableFile(object.key) && (
+                        <div className="absolute top-3 right-12 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="p-1 bg-blue-500/20 rounded-md" title="Double-click to preview">
+                            <Eye className="h-3 w-3 text-blue-400" />
+                          </div>
+                        </div>
+                      )}
 
                       {/* File operations */}
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -736,7 +888,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                           {isImage && !object.isFolder ? (
                             <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 shadow-inner group-hover:shadow-lg transition-shadow duration-300">
                               <img
-                                src={getImagePreviewUrl(bucketId, object.key)}
+                                src={getImagePreviewUrl(bucketId, object.key, getBucketPassword(bucketId) || undefined)}
                                 alt={displayName}
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                                 onError={(e) => {
@@ -799,12 +951,11 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                         : "hover:bg-white/5 border border-transparent hover:border-white/10"
                     }`}
                     onClick={() => {
-                      if (object.isFolder) {
-                        navigateToFolder(object.key);
-                      } else {
+                      if (!object.isFolder) {
                         toggleSelection(object.key);
                       }
                     }}
+                    onDoubleClick={() => handleFileDoubleClick(object)}
                   >
                     {/* Enhanced Checkbox */}
                     <div className="col-span-1 flex items-center">
@@ -824,9 +975,17 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
                       <div className="flex-shrink-0">
                         {getFileTypeIcon(displayName, object.isFolder)}
                       </div>
-                      <span className="text-white font-medium truncate group-hover:text-red-300 transition-colors duration-200" title={displayName}>
+                      <span
+                        className="text-white font-medium truncate group-hover:text-red-300 transition-colors duration-200"
+                        title={object.isFolder ? `Double-click to open ${displayName}` : isPreviewableFile(object.key) ? `Double-click to preview ${displayName}` : displayName}
+                      >
                         {displayName}
                       </span>
+                      {!object.isFolder && isPreviewableFile(object.key) && (
+                        <div title="Previewable file">
+                          <Eye className="h-3 w-3 text-blue-400 opacity-60" />
+                        </div>
+                      )}
                     </div>
 
                     {/* Enhanced Type */}
@@ -910,6 +1069,34 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
         }}
         currentPath={currentPath}
       />
+
+      {/* Password Prompt Modal */}
+      <PasswordPrompt
+        isOpen={showPasswordPrompt}
+        onClose={() => {
+          setShowPasswordPrompt(false);
+          setPasswordError("");
+        }}
+        onSubmit={handlePasswordSubmit}
+        bucketName={bucketName}
+        isVerifying={isVerifyingPassword}
+        error={passwordError}
+      />
+
+      {/* File Preview Modal */}
+      {previewFile && (
+        <FilePreview
+          isOpen={showPreview}
+          onClose={handleClosePreview}
+          bucketId={bucketId}
+          fileKey={previewFile.key}
+          fileName={getDisplayName(previewFile.key, previewFile.isFolder)}
+          fileSize={previewFile.size}
+          onDownload={() => {
+            // Optional: Add any additional download tracking here
+          }}
+        />
+      )}
     </div>
   );
 }

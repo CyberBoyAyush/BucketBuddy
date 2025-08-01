@@ -19,7 +19,14 @@ export async function POST(
     }
 
     const body = await request.json();
+    const { password } = body;
     const { bucketId, operation } = await params;
+
+    if (!password) {
+      return NextResponse.json({
+        error: "Password required to access encrypted bucket"
+      }, { status: 401 });
+    }
 
     // Find bucket and check permissions
     const bucket = await prisma.bucket.findFirst({
@@ -59,13 +66,22 @@ export async function POST(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const s3Service = createS3ServiceFromBucket({
-      encryptedAccessKey: bucket.encryptedAccessKey,
-      encryptedSecretKey: bucket.encryptedSecretKey,
-      region: bucket.region,
-      endpoint: bucket.endpoint || undefined,
-      bucketName: bucket.bucketName,
-    });
+    // Create S3 service with password
+    let s3Service;
+    try {
+      s3Service = createS3ServiceFromBucket({
+        encryptedAccessKey: bucket.encryptedAccessKey,
+        encryptedSecretKey: bucket.encryptedSecretKey,
+        region: bucket.region,
+        endpoint: bucket.endpoint || undefined,
+        bucketName: bucket.bucketName,
+      }, password);
+    } catch (decryptError) {
+      return NextResponse.json(
+        { error: "Invalid password - unable to decrypt bucket credentials" },
+        { status: 401 }
+      );
+    }
 
     switch (operation) {
       case "rename":

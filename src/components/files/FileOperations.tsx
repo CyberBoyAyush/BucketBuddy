@@ -5,6 +5,7 @@ import { Download, Edit3, Trash2, MoreVertical, FolderOpen } from "lucide-react"
 import { useToast } from "@/components/ui/Toast";
 import { DeleteConfirmation } from "./DeleteConfirmation";
 import { FolderSelector } from "./FolderSelector";
+import { getBucketPassword } from "@/lib/password-manager";
 
 interface FileOperationsProps {
   bucketId: string;
@@ -59,12 +60,23 @@ export function FileOperations({
   const handleDownload = async () => {
     setLoading(true);
     try {
+      const password = getBucketPassword(bucketId);
+      if (!password) {
+        addToast({
+          type: "error",
+          title: "Password required",
+          message: "Please unlock the bucket first",
+        });
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`/api/buckets/${bucketId}/files/download-url`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ key: fileKey }),
+        body: JSON.stringify({ key: fileKey, password }),
       });
 
       if (response.ok) {
@@ -102,10 +114,22 @@ export function FileOperations({
   const handleDeleteConfirm = async () => {
     setLoading(true);
     try {
+      const password = getBucketPassword(bucketId);
+      if (!password) {
+        addToast({
+          type: "error",
+          title: "Password required",
+          message: "Please unlock the bucket first",
+        });
+        setLoading(false);
+        setShowDeleteConfirm(false);
+        return;
+      }
+
       if (isBulk) {
         // Handle bulk delete
         const deletePromises = selectedFiles.map(key =>
-          fetch(`/api/buckets/${bucketId}/files?key=${encodeURIComponent(key)}`, {
+          fetch(`/api/buckets/${bucketId}/files?key=${encodeURIComponent(key)}&password=${encodeURIComponent(password)}`, {
             method: "DELETE",
           })
         );
@@ -131,7 +155,7 @@ export function FileOperations({
         // Handle single delete
         if (!fileKey) return;
 
-        const response = await fetch(`/api/buckets/${bucketId}/files?key=${encodeURIComponent(fileKey)}`, {
+        const response = await fetch(`/api/buckets/${bucketId}/files?key=${encodeURIComponent(fileKey)}&password=${encodeURIComponent(password)}`, {
           method: "DELETE",
         });
 
@@ -172,6 +196,18 @@ export function FileOperations({
 
     setLoading(true);
     try {
+      const password = getBucketPassword(bucketId);
+      if (!password) {
+        addToast({
+          type: "error",
+          title: "Password required",
+          message: "Please unlock the bucket first",
+        });
+        setLoading(false);
+        setShowRename(false);
+        return;
+      }
+
       const pathParts = fileKey.split("/");
       pathParts[pathParts.length - 1] = newName.trim();
       const newKey = pathParts.join("/");
@@ -184,6 +220,7 @@ export function FileOperations({
         body: JSON.stringify({
           sourceKey: fileKey,
           destinationKey: newKey,
+          password,
         }),
       });
 
@@ -223,6 +260,18 @@ export function FileOperations({
   const handleMoveToFolder = async (destinationPath: string) => {
     setLoading(true);
     try {
+      const password = getBucketPassword(bucketId);
+      if (!password) {
+        addToast({
+          type: "error",
+          title: "Password required",
+          message: "Please unlock the bucket first",
+        });
+        setLoading(false);
+        setShowFolderSelector(false);
+        return;
+      }
+
       if (isBulk) {
         // Handle bulk move
         const movePromises = selectedFiles.map(key => {
@@ -239,6 +288,7 @@ export function FileOperations({
             body: JSON.stringify({
               sourceKey: key,
               destinationKey: newKey,
+              password,
             }),
           });
         });
@@ -277,6 +327,7 @@ export function FileOperations({
           body: JSON.stringify({
             sourceKey: fileKey,
             destinationKey: newKey,
+            password,
           }),
         });
 
@@ -385,7 +436,7 @@ export function FileOperations({
               disabled={loading}
               className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hetzner-text-muted hetzner-hover hover:hetzner-text transition-all duration-200 disabled:opacity-50 rounded-lg mx-2"
             >
-              <Download className="h-4 w-4 text-blue-400" />
+              <Download className="h-4 w-4 hetzner-text-muted" />
               <span>Download</span>
             </button>
           )}

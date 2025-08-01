@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, Folder, Plus } from "lucide-react";
+import { getBucketPassword } from "@/lib/password-manager";
 
 interface NewFolderProps {
   bucketId: string;
@@ -34,6 +35,13 @@ export function NewFolder({ bucketId, currentPath, onFolderCreated, onClose }: N
     setError("");
 
     try {
+      const password = getBucketPassword(bucketId);
+      if (!password) {
+        setError("Password required to create folders");
+        setIsCreating(false);
+        return;
+      }
+
       const response = await fetch(`/api/buckets/${bucketId}/files/create-folder`, {
         method: "POST",
         headers: {
@@ -42,6 +50,7 @@ export function NewFolder({ bucketId, currentPath, onFolderCreated, onClose }: N
         body: JSON.stringify({
           folderName: sanitizedName,
           path: currentPath,
+          password,
         }),
       });
 

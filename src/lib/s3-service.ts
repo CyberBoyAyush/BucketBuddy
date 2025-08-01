@@ -1,15 +1,15 @@
-import { 
-  S3Client, 
-  ListObjectsV2Command, 
-  GetObjectCommand, 
-  PutObjectCommand, 
-  DeleteObjectCommand, 
+import {
+  S3Client,
+  ListObjectsV2Command,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
   CopyObjectCommand,
   HeadBucketCommand,
   HeadObjectCommand
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { decryptCredentials } from './encryption';
+import { decryptCredentialsWithPassword } from './encryption';
 
 export interface S3Config {
   accessKey: string;
@@ -244,7 +244,7 @@ export class S3Service {
 }
 
 /**
- * Create an S3Service instance from encrypted bucket credentials
+ * Create an S3Service instance from encrypted bucket credentials with password
  */
 export function createS3ServiceFromBucket(bucket: {
   encryptedAccessKey: string;
@@ -252,10 +252,11 @@ export function createS3ServiceFromBucket(bucket: {
   region: string;
   endpoint?: string;
   bucketName: string;
-}): S3Service {
-  const { accessKey, secretKey } = decryptCredentials(
+}, password: string): S3Service {
+  const { accessKey, secretKey } = decryptCredentialsWithPassword(
     bucket.encryptedAccessKey,
-    bucket.encryptedSecretKey
+    bucket.encryptedSecretKey,
+    password
   );
 
   return new S3Service({
