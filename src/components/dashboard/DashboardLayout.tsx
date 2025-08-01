@@ -35,7 +35,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Logo */}
             <Link href="/dashboard" className="flex items-center space-x-2">
               <Cloud className="h-7 w-7 hetzner-red" />
-              <span className="text-lg font-semibold hetzner-text">S3R2UI</span>
+              <span className="text-lg font-semibold hetzner-text">BucketBuddy</span>
             </Link>
 
             {/* Bucket Selector */}

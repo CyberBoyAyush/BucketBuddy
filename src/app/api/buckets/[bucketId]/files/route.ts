@@ -22,6 +22,7 @@ export async function GET(
     const prefix = searchParams.get("prefix") || "";
     const continuationToken = searchParams.get("continuationToken") || undefined;
     const maxKeys = parseInt(searchParams.get("maxKeys") || "1000");
+    const password = searchParams.get("password");
     const { bucketId } = await params;
 
     // Find bucket and check permissions
@@ -62,22 +63,37 @@ export async function GET(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Create S3 service and list objects
-    const s3Service = createS3ServiceFromBucket({
-      encryptedAccessKey: bucket.encryptedAccessKey,
-      encryptedSecretKey: bucket.encryptedSecretKey,
-      region: bucket.region,
-      endpoint: bucket.endpoint || undefined,
-      bucketName: bucket.bucketName,
-    });
-    const result = await s3Service.listObjects(prefix, continuationToken, maxKeys);
+    // Check if password is required for encrypted bucket
+    if (!password) {
+      return NextResponse.json({
+        error: "Password required to access encrypted bucket"
+      }, { status: 401 });
+    }
 
-    return NextResponse.json({
-      objects: result.objects,
-      continuationToken: result.continuationToken,
-      isTruncated: result.isTruncated,
-      prefix,
-    });
+    // Create S3 service with password and list objects
+    try {
+      const s3Service = createS3ServiceFromBucket({
+        encryptedAccessKey: bucket.encryptedAccessKey,
+        encryptedSecretKey: bucket.encryptedSecretKey,
+        region: bucket.region,
+        endpoint: bucket.endpoint || undefined,
+        bucketName: bucket.bucketName,
+      }, password);
+      const result = await s3Service.listObjects(prefix, continuationToken, maxKeys);
+
+      return NextResponse.json({
+        objects: result.objects,
+        continuationToken: result.continuationToken,
+        isTruncated: result.isTruncated,
+        prefix,
+      });
+    } catch (decryptError) {
+      console.error("Error decrypting credentials:", decryptError);
+      return NextResponse.json(
+        { error: "Invalid password - unable to decrypt bucket credentials" },
+        { status: 401 }
+      );
+    }
   } catch (error) {
     console.error("Error listing files:", error);
     return NextResponse.json(
@@ -101,7 +117,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { key, contentType } = body;
+    const { key, contentType, password } = body;
     const { bucketId } = await params;
 
     if (!key) {
@@ -109,6 +125,12 @@ export async function POST(
         { error: "File key is required" },
         { status: 400 }
       );
+    }
+
+    if (!password) {
+      return NextResponse.json({
+        error: "Password required to access encrypted bucket"
+      }, { status: 401 });
     }
 
     // Find bucket and check permissions
@@ -149,17 +171,24 @@ export async function POST(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Create S3 service and generate upload URL
-    const s3Service = createS3ServiceFromBucket({
-      encryptedAccessKey: bucket.encryptedAccessKey,
-      encryptedSecretKey: bucket.encryptedSecretKey,
-      region: bucket.region,
-      endpoint: bucket.endpoint || undefined,
-      bucketName: bucket.bucketName,
-    });
-    const uploadUrl = await s3Service.getUploadUrl(key, contentType);
+    // Create S3 service with password and generate upload URL
+    try {
+      const s3Service = createS3ServiceFromBucket({
+        encryptedAccessKey: bucket.encryptedAccessKey,
+        encryptedSecretKey: bucket.encryptedSecretKey,
+        region: bucket.region,
+        endpoint: bucket.endpoint || undefined,
+        bucketName: bucket.bucketName,
+      }, password);
+      const uploadUrl = await s3Service.getUploadUrl(key, contentType);
 
-    return NextResponse.json({ uploadUrl });
+      return NextResponse.json({ uploadUrl });
+    } catch (decryptError) {
+      return NextResponse.json(
+        { error: "Invalid password - unable to decrypt bucket credentials" },
+        { status: 401 }
+      );
+    }
   } catch (error) {
     console.error("Error generating upload URL:", error);
     return NextResponse.json(
@@ -184,6 +213,7 @@ export async function DELETE(
 
     const { searchParams } = new URL(request.url);
     const key = searchParams.get("key");
+    const password = searchParams.get("password");
     const { bucketId } = await params;
 
     if (!key) {
@@ -191,6 +221,12 @@ export async function DELETE(
         { error: "File key is required" },
         { status: 400 }
       );
+    }
+
+    if (!password) {
+      return NextResponse.json({
+        error: "Password required to access encrypted bucket"
+      }, { status: 401 });
     }
 
     // Find bucket and check permissions
@@ -231,17 +267,24 @@ export async function DELETE(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Create S3 service and delete object
-    const s3Service = createS3ServiceFromBucket({
-      encryptedAccessKey: bucket.encryptedAccessKey,
-      encryptedSecretKey: bucket.encryptedSecretKey,
-      region: bucket.region,
-      endpoint: bucket.endpoint || undefined,
-      bucketName: bucket.bucketName,
-    });
-    await s3Service.deleteObject(key);
+    // Create S3 service with password and delete object
+    try {
+      const s3Service = createS3ServiceFromBucket({
+        encryptedAccessKey: bucket.encryptedAccessKey,
+        encryptedSecretKey: bucket.encryptedSecretKey,
+        region: bucket.region,
+        endpoint: bucket.endpoint || undefined,
+        bucketName: bucket.bucketName,
+      }, password);
+      await s3Service.deleteObject(key);
 
-    return NextResponse.json({ message: "File deleted successfully" });
+      return NextResponse.json({ message: "File deleted successfully" });
+    } catch (decryptError) {
+      return NextResponse.json(
+        { error: "Invalid password - unable to decrypt bucket credentials" },
+        { status: 401 }
+      );
+    }
   } catch (error) {
     console.error("Error deleting file:", error);
     return NextResponse.json(

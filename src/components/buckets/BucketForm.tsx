@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, Loader2, CheckCircle, XCircle, Info } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle, XCircle, Info, Lock } from "lucide-react";
 import { S3_PROVIDERS, getProviderById, getProviderEndpoint } from "@/lib/s3-providers";
 
 interface BucketFormData {
@@ -12,6 +12,7 @@ interface BucketFormData {
   accessKey: string;
   secretKey: string;
   bucketName: string;
+  encryptionPassword: string;
 }
 
 interface BucketFormProps {
@@ -29,10 +30,12 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
     accessKey: "",
     secretKey: "",
     bucketName: "",
+    encryptionPassword: "",
     ...initialData,
   });
 
   const [showSecretKey, setShowSecretKey] = useState(false);
+  const [showEncryptionPassword, setShowEncryptionPassword] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{
     status: "idle" | "testing" | "success" | "error";
     message: string;
@@ -262,6 +265,52 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
                 <Eye className="h-5 w-5" />
               )}
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Encryption Password */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold hetzner-text">Encryption Security</h3>
+
+        <div>
+          <label className="block text-sm font-medium hetzner-text mb-2">
+            Encryption Password
+          </label>
+          <div className="relative">
+            <input
+              type={showEncryptionPassword ? "text" : "password"}
+              value={formData.encryptionPassword}
+              onChange={(e) => handleInputChange("encryptionPassword", e.target.value)}
+              className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
+              placeholder="Enter a strong password for encryption"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowEncryptionPassword(!showEncryptionPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center hetzner-text-muted hover:hetzner-text transition-colors duration-150"
+            >
+              {showEncryptionPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+          <div className="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+            <div className="flex items-start space-x-2">
+              <Lock className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-yellow-400">
+                <p className="font-medium mb-1">Important Security Information:</p>
+                <ul className="space-y-1 list-disc list-inside">
+                  <li>This password encrypts your bucket credentials for maximum security</li>
+                  <li>You'll need this password to access your bucket files</li>
+                  <li>We don't store this password - keep it safe!</li>
+                  <li>Use a strong, unique password you won't forget</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>

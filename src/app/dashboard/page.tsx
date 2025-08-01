@@ -45,7 +45,7 @@ export default function DashboardPage() {
           /* No Buckets - Getting Started */
           <div className="hetzner-card rounded-lg p-8 text-center">
             <Database className="h-16 w-16 hetzner-text-muted mx-auto mb-4" />
-            <h2 className="text-2xl font-bold hetzner-text mb-2">Get Started with S3R2UI</h2>
+            <h2 className="text-2xl font-bold hetzner-text mb-2">Get Started with BucketBuddy</h2>
             <p className="hetzner-text-muted mb-6 max-w-md mx-auto">
               Connect your first S3 or R2 bucket to start managing your cloud storage files with ease.
             </p>

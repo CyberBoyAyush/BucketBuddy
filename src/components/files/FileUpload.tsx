@@ -6,6 +6,7 @@ import { Upload, X, File, CheckCircle, AlertCircle, Loader2, FileText, Image, Vi
 import { formatFileSize, sanitizeS3Key, getFileType } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { parseError, logError, handleApiResponse } from "@/lib/error-handling";
+import { getBucketPassword } from "@/lib/password-manager";
 
 interface FileUploadProps {
   bucketId: string;
@@ -81,6 +82,12 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
       const fileName = sanitizeS3Key(file.name);
       const fileKey = currentPath + fileName;
 
+      // Get password for bucket
+      const password = getBucketPassword(bucketId);
+      if (!password) {
+        throw new Error("Password required to upload files");
+      }
+
       // Get upload URL
       const response = await fetch(`/api/buckets/${bucketId}/files`, {
         method: "POST",
@@ -90,6 +97,7 @@ export function FileUpload({ bucketId, currentPath, onUploadComplete, onClose }:
         body: JSON.stringify({
           key: fileKey,
           contentType: file.type,
+          password,
         }),
       });
 

@@ -43,7 +43,7 @@ export default function LoginPage() {
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
             <Cloud className="h-8 w-8 hetzner-red" />
-            <span className="text-xl font-semibold hetzner-text">S3R2UI</span>
+            <span className="text-xl font-semibold hetzner-text">BucketBuddy</span>
           </Link>
           <h2 className="text-2xl font-bold hetzner-text mb-2">Welcome back</h2>
           <p className="hetzner-text-muted">Sign in to your account to continue</p>

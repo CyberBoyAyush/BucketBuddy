@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { encryptCredentials } from "@/lib/encryption";
+import { encryptCredentialsWithPassword, hashPassword } from "@/lib/encryption";
 import { S3Service } from "@/lib/s3-service";
 import { headers } from "next/headers";
 
@@ -108,12 +108,13 @@ export async function POST(request: NextRequest) {
       accessKey,
       secretKey,
       bucketName,
+      encryptionPassword,
     } = body;
 
     // Validate required fields
-    if (!name || !provider || !region || !accessKey || !secretKey || !bucketName) {
+    if (!name || !provider || !region || !accessKey || !secretKey || !bucketName || !encryptionPassword) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields including encryption password" },
         { status: 400 }
       );
     }
@@ -135,11 +136,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Encrypt credentials
-    const { encryptedAccessKey, encryptedSecretKey } = encryptCredentials(
+    // Encrypt credentials with password and hash the password
+    const { encryptedAccessKey, encryptedSecretKey } = encryptCredentialsWithPassword(
       accessKey,
-      secretKey
+      secretKey,
+      encryptionPassword
     );
+    const passwordHash = hashPassword(encryptionPassword);
 
     // Check if bucket already exists for this user
     const existingBucket = await prisma.bucket.findFirst({
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create bucket
+    // Create bucket with password hash
     const bucket = await prisma.bucket.create({
       data: {
         name,
@@ -167,6 +170,7 @@ export async function POST(request: NextRequest) {
         encryptedAccessKey,
         encryptedSecretKey,
         bucketName,
+        passwordHash,
         ownerId: session.user.id,
       },
       include: {

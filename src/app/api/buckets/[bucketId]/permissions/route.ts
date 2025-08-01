@@ -18,6 +18,7 @@ export async function GET(
     }
 
     const { bucketId } = await params;
+    console.log('Fetching permissions for bucket:', bucketId);
 
     // Find bucket and check permissions
     const bucket = await prisma.bucket.findFirst({
@@ -43,11 +44,17 @@ export async function GET(
           },
         },
       },
+    }).catch((error) => {
+      console.error('Database error in permissions:', error);
+      return null;
     });
 
     if (!bucket) {
+      console.log('Bucket not found for ID:', bucketId);
       return NextResponse.json({ error: "Bucket not found" }, { status: 404 });
     }
+
+    console.log('Bucket found:', bucket.id, bucket.name);
 
     // Determine user role and permissions
     const isOwner = bucket.ownerId === session.user.id;
@@ -64,6 +71,7 @@ export async function GET(
     return NextResponse.json({ permissions });
   } catch (error) {
     console.error("Error getting bucket permissions:", error);
+    console.error("Error details:", error);
     return NextResponse.json(
       { error: "Failed to get bucket permissions" },
       { status: 500 }

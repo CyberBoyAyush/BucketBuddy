@@ -19,7 +19,14 @@ export async function POST(
     }
 
     const body = await request.json();
+    const { password } = body;
     const { bucketId, operation } = await params;
+
+    if (!password) {
+      return NextResponse.json({
+        error: "Password required to access encrypted bucket"
+      }, { status: 401 });
+    }
 
     // Find bucket and check permissions
     const bucket = await prisma.bucket.findFirst({
@@ -59,13 +66,22 @@ export async function POST(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const s3Service = createS3ServiceFromBucket({
-      encryptedAccessKey: bucket.encryptedAccessKey,
-      encryptedSecretKey: bucket.encryptedSecretKey,
-      region: bucket.region,
-      endpoint: bucket.endpoint || undefined,
-      bucketName: bucket.bucketName,
-    });
+    // Create S3 service with password
+    let s3Service;
+    try {
+      s3Service = createS3ServiceFromBucket({
+        encryptedAccessKey: bucket.encryptedAccessKey,
+        encryptedSecretKey: bucket.encryptedSecretKey,
+        region: bucket.region,
+        endpoint: bucket.endpoint || undefined,
+        bucketName: bucket.bucketName,
+      }, password);
+    } catch (decryptError) {
+      return NextResponse.json(
+        { error: "Invalid password - unable to decrypt bucket credentials" },
+        { status: 401 }
+      );
+    }
 
     switch (operation) {
       case "rename":
@@ -146,6 +162,42 @@ export async function POST(
         const metadata = await s3Service.getObjectMetadata(key);
 
         return NextResponse.json({ metadata });
+      }
+
+      case "create-folder": {
+        const { folderName, path } = body;
+
+        if (!folderName) {
+          return NextResponse.json(
+            { error: "Folder name is required" },
+            { status: 400 }
+          );
+        }
+
+        // Check if user has write permission
+        if (!hasPermission(userRole, "write")) {
+          return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        }
+
+        // Sanitize folder name
+        const sanitizedFolderName = folderName.replace(/[^a-zA-Z0-9\-_\s]/g, '').trim();
+        if (!sanitizedFolderName) {
+          return NextResponse.json(
+            { error: "Invalid folder name" },
+            { status: 400 }
+          );
+        }
+
+        // Create folder key with trailing slash
+        const folderKey = path ? `${path}${sanitizedFolderName}/` : `${sanitizedFolderName}/`;
+
+        // Create an empty object to represent the folder
+        await s3Service.createFolder(folderKey);
+
+        return NextResponse.json({
+          message: "Folder created successfully",
+          folderKey,
+        });
       }
 
       default:

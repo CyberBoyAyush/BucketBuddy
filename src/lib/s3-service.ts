@@ -1,15 +1,15 @@
-import { 
-  S3Client, 
-  ListObjectsV2Command, 
-  GetObjectCommand, 
-  PutObjectCommand, 
-  DeleteObjectCommand, 
+import {
+  S3Client,
+  ListObjectsV2Command,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
   CopyObjectCommand,
   HeadBucketCommand,
   HeadObjectCommand
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { decryptCredentials } from './encryption';
+import { decryptCredentialsWithPassword } from './encryption';
 
 export interface S3Config {
   accessKey: string;
@@ -180,6 +180,28 @@ export class S3Service {
   }
 
   /**
+   * Create a folder by uploading an empty object with trailing slash
+   */
+  async createFolder(folderKey: string): Promise<void> {
+    try {
+      // Ensure the folder key ends with a slash
+      const key = folderKey.endsWith('/') ? folderKey : `${folderKey}/`;
+
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: '', // Empty body for folder
+        ContentType: 'application/x-directory',
+      });
+
+      await this.client.send(command);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      throw new Error('Failed to create folder');
+    }
+  }
+
+  /**
    * Copy/rename an object
    */
   async copyObject(sourceKey: string, destinationKey: string): Promise<void> {
@@ -222,7 +244,7 @@ export class S3Service {
 }
 
 /**
- * Create an S3Service instance from encrypted bucket credentials
+ * Create an S3Service instance from encrypted bucket credentials with password
  */
 export function createS3ServiceFromBucket(bucket: {
   encryptedAccessKey: string;
@@ -230,10 +252,11 @@ export function createS3ServiceFromBucket(bucket: {
   region: string;
   endpoint?: string;
   bucketName: string;
-}): S3Service {
-  const { accessKey, secretKey } = decryptCredentials(
+}, password: string): S3Service {
+  const { accessKey, secretKey } = decryptCredentialsWithPassword(
     bucket.encryptedAccessKey,
-    bucket.encryptedSecretKey
+    bucket.encryptedSecretKey,
+    password
   );
 
   return new S3Service({

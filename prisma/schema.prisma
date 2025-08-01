@@ -85,9 +85,10 @@ model Bucket {
   provider          String   // AWS, Cloudflare, DigitalOcean, etc.
   region            String
   endpoint          String?  // Custom endpoint for S3-compatible services
-  encryptedAccessKey String  // AES-256 encrypted
-  encryptedSecretKey String  // AES-256 encrypted
+  encryptedAccessKey String  // Password-based encrypted
+  encryptedSecretKey String  // Password-based encrypted
   bucketName        String
+  passwordHash      String?  // Hashed encryption password for verification
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   ownerId           String
