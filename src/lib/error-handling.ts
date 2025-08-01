@@ -1,5 +1,5 @@
 /**
- * Comprehensive error handling utilities for S3R2UI
+ * Comprehensive error handling utilities for BucketBuddy
  */
 
 export interface AppError {
@@ -9,14 +9,14 @@ export interface AppError {
   statusCode?: number;
 }
 
-export class S3R2UIError extends Error {
+export class BucketBuddyError extends Error {
   public code: string;
   public statusCode: number;
   public details?: Record<string, unknown>;
 
   constructor(code: string, message: string, statusCode = 500, details?: Record<string, unknown>) {
     super(message);
-    this.name = 'S3R2UIError';
+    this.name = 'BucketBuddyError';
     this.code = code;
     this.statusCode = statusCode;
     this.details = details;
@@ -94,7 +94,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
  */
 export function parseError(error: unknown): AppError {
   // If it's already our custom error
-  if (error instanceof S3R2UIError) {
+  if (error instanceof BucketBuddyError) {
     return {
       code: error.code,
       message: error.message,
@@ -210,7 +210,7 @@ export function parseError(error: unknown): AppError {
 export function logError(error: unknown, context?: string) {
   const parsedError = parseError(error);
   
-  console.error(`[S3R2UI Error]${context ? ` ${context}:` : ''}`, {
+  console.error(`[BucketBuddy Error]${context ? ` ${context}:` : ''}`, {
     code: parsedError.code,
     message: parsedError.message,
     statusCode: parsedError.statusCode,
@@ -231,7 +231,7 @@ export async function handleApiResponse(response: Response) {
       errorData = { message: response.statusText };
     }
     
-    throw new S3R2UIError(
+    throw new BucketBuddyError(
       errorData.code || ERROR_CODES.INTERNAL_ERROR,
       errorData.message || ERROR_MESSAGES[ERROR_CODES.INTERNAL_ERROR],
       response.status,
