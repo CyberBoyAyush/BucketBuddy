@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BucketBuddy Favicon Generator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #0a0a0a; 
+            color: white; 
+        }
+        .favicon-preview { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            display: inline-block; 
+            margin: 10px; 
+        }
+        .dark-preview { 
+            background: #0a0a0a; 
+        }
+        canvas { 
+            border: 1px solid #ccc; 
+            margin: 10px; 
+        }
+    </style>
+</head>
+<body>
+    <h1>🪣 BucketBuddy Favicon Generator</h1>
+    <p>This page generates favicon files for BucketBuddy. Open browser dev tools and run the script below.</p>
+    
+    <div class="favicon-preview">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" id="logo">
+            <path d="M8 12L9 26C9.1 27.1 10 28 11.1 28H20.9C22 28 22.9 27.1 23 26L24 12H8Z" fill="#DC2626"/>
+            <ellipse cx="16" cy="12" rx="8" ry="2" fill="#EF4444"/>
+            <path d="M10 10C10 8 12 6 16 6C20 6 22 8 22 10" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <circle cx="22" cy="8" r="1.5" fill="#DC2626" opacity="0.6"/>
+        </svg>
+    </div>
+
+    <div class="favicon-preview dark-preview">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12L9 26C9.1 27.1 10 28 11.1 28H20.9C22 28 22.9 27.1 23 26L24 12H8Z" fill="#DC2626"/>
+            <ellipse cx="16" cy="12" rx="8" ry="2" fill="#EF4444"/>
+            <path d="M10 10C10 8 12 6 16 6C20 6 22 8 22 10" stroke="#B91C1C" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <circle cx="22" cy="8" r="1.5" fill="#DC2626" opacity="0.6"/>
+        </svg>
+    </div>
+
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <canvas id="canvas32" width="32" height="32"></canvas>
+    <canvas id="canvas180" width="180" height="180"></canvas>
+
+    <script>
+        // Function to convert SVG to Canvas and download
+        function generateFavicons() {
+            const svg = document.getElementById('logo');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const img = new Image();
+            img.onload = function() {
+                // Generate 16x16 favicon
+                const canvas16 = document.getElementById('canvas16');
+                const ctx16 = canvas16.getContext('2d');
+                ctx16.drawImage(img, 0, 0, 16, 16);
+                
+                // Generate 32x32 favicon  
+                const canvas32 = document.getElementById('canvas32');
+                const ctx32 = canvas32.getContext('2d');
+                ctx32.drawImage(img, 0, 0, 32, 32);
+                
+                // Generate 180x180 Apple touch icon
+                const canvas180 = document.getElementById('canvas180');
+                const ctx180 = canvas180.getContext('2d');
+                ctx180.drawImage(img, 0, 0, 180, 180);
+                
+                // Download links
+                console.log('Favicons generated! Right-click canvases to save as PNG files.');
+                console.log('Save canvas16 as favicon-16x16.png');
+                console.log('Save canvas32 as favicon-32x32.png'); 
+                console.log('Save canvas180 as apple-touch-icon.png');
+            };
+            img.src = svgUrl;
+        }
+        
+        // Auto-generate on page load
+        window.onload = generateFavicons;
+    </script>
+</body>
+</html>

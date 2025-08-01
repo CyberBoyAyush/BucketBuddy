@@ -4,13 +4,13 @@ import { useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import {
-  Cloud,
   Settings,
   LogOut,
   ChevronDown
 } from "lucide-react";
 import Link from "next/link";
 import { NavbarBucketSelector } from "./NavbarBucketSelector";
+import { Logo } from "@/components/ui/Logo";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -33,9 +33,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-8">
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <Cloud className="h-7 w-7 hetzner-red" />
-              <span className="text-lg font-semibold hetzner-text">BucketBuddy</span>
+            <Link href="/dashboard" className="flex items-center">
+              <Logo size="md" />
             </Link>
 
             {/* Bucket Selector */}
