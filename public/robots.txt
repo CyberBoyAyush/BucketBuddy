@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bucketbuddy.dev/sitemap.xml
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /_next/
+Disallow: /admin/
+
+# Allow public pages
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /about
+Allow: /privacy
+Allow: /terms

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Cloud, Shield, Users, Zap, Database, Globe, ArrowRight, Star, CheckCircle, Sparkles, Github, Mail } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 export default function Home() {
   return (
@@ -8,12 +9,8 @@ export default function Home() {
       <nav className="border-b hetzner-border hetzner-card backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2 group">
-              <div className="relative">
-                <Cloud className="h-7 w-7 hetzner-red transition-transform duration-300 group-hover:scale-110" />
-                <div className="absolute inset-0 hetzner-red opacity-20 blur-lg group-hover:opacity-40 transition-opacity duration-300"></div>
-              </div>
-              <span className="text-lg font-semibold hetzner-text">BucketBuddy</span>
+            <div className="group">
+              <Logo size="md" className="transition-transform duration-300 group-hover:scale-110" />
             </div>
             <div className="flex items-center space-x-6">
               <Link
@@ -329,10 +326,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <Cloud className="h-6 w-6 hetzner-red" />
-              <span className="font-semibold hetzner-text">BucketBuddy</span>
-            </div>
+            <Logo size="sm" />
 
             {/* Contact and GitHub */}
             <div className="flex items-center gap-4">

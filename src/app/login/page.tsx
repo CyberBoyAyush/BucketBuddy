@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Cloud, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { Logo } from "@/components/ui/Logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -41,9 +42,8 @@ export default function LoginPage() {
     <div className="min-h-screen hetzner-bg flex items-center justify-center p-4">
       <div className="max-w-sm w-full space-y-8">
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <Cloud className="h-8 w-8 hetzner-red" />
-            <span className="text-xl font-semibold hetzner-text">BucketBuddy</span>
+          <Link href="/" className="inline-flex items-center mb-8">
+            <Logo size="lg" />
           </Link>
           <h2 className="text-2xl font-bold hetzner-text mb-2">Welcome back</h2>
           <p className="hetzner-text-muted">Sign in to your account to continue</p>
