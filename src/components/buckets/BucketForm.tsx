@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, Loader2, CheckCircle, XCircle, Info, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle, XCircle, Info, Lock, Unlock } from "lucide-react";
 import { S3_PROVIDERS, getProviderById, getProviderEndpoint } from "@/lib/s3-providers";
+import { PasswordPromptModal } from "@/components/ui/PasswordPromptModal";
 
 interface BucketFormData {
   name: string;
@@ -19,9 +20,17 @@ interface BucketFormProps {
   onSubmit: (data: BucketFormData) => Promise<void>;
   isSubmitting: boolean;
   initialData?: Partial<BucketFormData>;
+  isAdmin?: boolean;
+  onLoadCredentials?: (password: string) => Promise<boolean>;
 }
 
-export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormProps) {
+export function BucketForm({
+  onSubmit,
+  isSubmitting,
+  initialData,
+  isAdmin = false,
+  onLoadCredentials
+}: BucketFormProps) {
   const [formData, setFormData] = useState<BucketFormData>({
     name: "",
     provider: "aws",
@@ -34,8 +43,11 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
     ...initialData,
   });
 
+  const [showAccessKey, setShowAccessKey] = useState(false);
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [showEncryptionPassword, setShowEncryptionPassword] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [credentialsLoaded, setCredentialsLoaded] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{
     status: "idle" | "testing" | "success" | "error";
     message: string;
@@ -44,6 +56,35 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
   const [showCorsInstructions, setShowCorsInstructions] = useState(false);
 
   const selectedProvider = getProviderById(formData.provider);
+
+  // Update form data when initialData changes (e.g., when credentials are loaded)
+  useEffect(() => {
+    if (initialData) {
+      console.log('BucketForm updating with credentials:', {
+        hasAccessKey: !!initialData.accessKey,
+        hasSecretKey: !!initialData.secretKey,
+        hasEncryptionPassword: !!initialData.encryptionPassword
+      });
+      setFormData({
+        name: initialData.name || "",
+        provider: initialData.provider || "aws",
+        region: initialData.region || "us-east-1",
+        endpoint: initialData.endpoint || "",
+        accessKey: initialData.accessKey || "",
+        secretKey: initialData.secretKey || "",
+        bucketName: initialData.bucketName || "",
+        encryptionPassword: initialData.encryptionPassword || "",
+      });
+      // If credentials are present, mark them as loaded
+      if (initialData.accessKey && initialData.secretKey) {
+        console.log('Marking credentials as loaded');
+        setCredentialsLoaded(true);
+      } else {
+        console.log('No credentials in initialData, keeping credentialsLoaded as false');
+        setCredentialsLoaded(false);
+      }
+    }
+  }, [initialData?.accessKey, initialData?.secretKey, initialData?.encryptionPassword, initialData?.name, initialData?.provider]);
 
   useEffect(() => {
     if (selectedProvider) {
@@ -122,7 +163,25 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
     }
   };
 
+  const handleLoadCredentials = async (password: string) => {
+    console.log('handleLoadCredentials called with password');
+    if (onLoadCredentials) {
+      console.log('Calling onLoadCredentials...');
+      const success = await onLoadCredentials(password);
+      console.log('onLoadCredentials result:', success);
+      if (success) {
+        console.log('Setting credentialsLoaded to true');
+        setCredentialsLoaded(true);
+        return true;
+      }
+    }
+    return false;
+  };
+
+
+
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
@@ -223,51 +282,101 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
         </div>
       </div>
 
-      {/* Credentials */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold hetzner-text">Access Credentials</h3>
+      {/* Credentials - Admin Only */}
+      {isAdmin ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold hetzner-text">Access Credentials</h3>
+            {initialData && !credentialsLoaded && (
+              <button
+                type="button"
+                onClick={() => setShowPasswordPrompt(true)}
+                className="inline-flex items-center px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 hetzner-text rounded-lg transition-colors duration-150"
+              >
+                <Unlock className="h-4 w-4 mr-1.5" />
+                View Credentials
+              </button>
+            )}
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium hetzner-text mb-2">
-            Access Key ID
-          </label>
-          <input
-            type="text"
-            value={formData.accessKey}
-            onChange={(e) => handleInputChange("accessKey", e.target.value)}
-            className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150"
-            placeholder="Your access key ID"
-            required
-          />
+          {(!initialData || credentialsLoaded) ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium hetzner-text mb-2">
+                  Access Key ID
+                </label>
+                <div className="relative">
+                  <input
+                    type={showAccessKey ? "text" : "password"}
+                    value={formData.accessKey}
+                    onChange={(e) => handleInputChange("accessKey", e.target.value)}
+                    className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
+                    placeholder="Your access key ID"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAccessKey(!showAccessKey)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hetzner-text-muted hover:hetzner-text transition-colors"
+                  >
+                    {showAccessKey ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium hetzner-text mb-2">
+                  Secret Access Key
+                </label>
+                <div className="relative">
+                  <input
+                    type={showSecretKey ? "text" : "password"}
+                    value={formData.secretKey}
+                    onChange={(e) => handleInputChange("secretKey", e.target.value)}
+                    className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
+                    placeholder="Your secret access key"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecretKey(!showSecretKey)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center hetzner-text-muted hover:hetzner-text transition-colors duration-150"
+                  >
+                    {showSecretKey ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <Lock className="h-5 w-5 text-gray-400" />
+                <div>
+                  <p className="hetzner-text font-medium">Credentials Protected</p>
+                  <p className="hetzner-text-subtle text-sm">Enter your password to view and edit credentials</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-
-        <div>
-          <label className="block text-sm font-medium hetzner-text mb-2">
-            Secret Access Key
-          </label>
-          <div className="relative">
-            <input
-              type={showSecretKey ? "text" : "password"}
-              value={formData.secretKey}
-              onChange={(e) => handleInputChange("secretKey", e.target.value)}
-              className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
-              placeholder="Your secret access key"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowSecretKey(!showSecretKey)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center hetzner-text-muted hover:hetzner-text transition-colors duration-150"
-            >
-              {showSecretKey ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
+      ) : (
+        <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-4">
+          <div className="flex items-center space-x-3">
+            <Lock className="h-5 w-5 text-gray-400" />
+            <div>
+              <p className="hetzner-text font-medium">Credentials Access Restricted</p>
+              <p className="hetzner-text-subtle text-sm">Only bucket owners and admins can view credentials</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Encryption Password */}
       <div className="space-y-4">
@@ -276,15 +385,23 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
         <div>
           <label className="block text-sm font-medium hetzner-text mb-2">
             Encryption Password
+            {isAdmin && credentialsLoaded && !!initialData && (
+              <span className="ml-2 text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">
+                Admin View
+              </span>
+            )}
           </label>
           <div className="relative">
             <input
               type={showEncryptionPassword ? "text" : "password"}
               value={formData.encryptionPassword}
               onChange={(e) => handleInputChange("encryptionPassword", e.target.value)}
-              className="w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10"
-              placeholder="Enter a strong password for encryption"
+              className={`w-full px-3 py-2.5 hetzner-card hetzner-border rounded-lg hetzner-text placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors duration-150 pr-10 ${
+                isAdmin && credentialsLoaded && !!initialData ? 'bg-gray-800/50' : ''
+              }`}
+              placeholder={isAdmin && credentialsLoaded && !!initialData ? "Current encryption password" : "Enter a strong password for encryption"}
               required
+              readOnly={isAdmin && credentialsLoaded && !!initialData}
             />
             <button
               type="button"
@@ -298,17 +415,39 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
               )}
             </button>
           </div>
-          <div className="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          <div className={`mt-2 p-3 border rounded-lg ${
+            isAdmin && credentialsLoaded && !!initialData
+              ? 'bg-red-500/10 border-red-500/20'
+              : 'bg-yellow-500/10 border-yellow-500/20'
+          }`}>
             <div className="flex items-start space-x-2">
-              <Lock className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-yellow-400">
-                <p className="font-medium mb-1">Important Security Information:</p>
-                <ul className="space-y-1 list-disc list-inside">
-                  <li>This password encrypts your bucket credentials for maximum security</li>
-                  <li>You'll need this password to access your bucket files</li>
-                  <li>We don't store this password - keep it safe!</li>
-                  <li>Use a strong, unique password you won't forget</li>
-                </ul>
+              <Lock className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                isAdmin && credentialsLoaded && !!initialData ? 'text-red-400' : 'text-yellow-400'
+              }`} />
+              <div className={`text-xs ${
+                isAdmin && credentialsLoaded && !!initialData ? 'text-red-400' : 'text-yellow-400'
+              }`}>
+                {isAdmin && credentialsLoaded && !!initialData ? (
+                  <>
+                    <p className="font-medium mb-1">Admin View - Sensitive Information:</p>
+                    <ul className="space-y-1 list-disc list-inside">
+                      <li>This is the current encryption password for this bucket</li>
+                      <li>This password is shared with all bucket members</li>
+                      <li>Handle with extreme care - do not share outside authorized users</li>
+                      <li>Members need this password to access bucket files</li>
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium mb-1">Important Security Information:</p>
+                    <ul className="space-y-1 list-disc list-inside">
+                      <li>This password encrypts your bucket credentials for maximum security</li>
+                      <li>You'll need this password to access your bucket files</li>
+                      <li>We don't store this password - keep it safe!</li>
+                      <li>Use a strong, unique password you won't forget</li>
+                    </ul>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -429,5 +568,15 @@ export function BucketForm({ onSubmit, isSubmitting, initialData }: BucketFormPr
         </button>
       </div>
     </form>
+
+    {/* Password Prompt Modal */}
+    <PasswordPromptModal
+      isOpen={showPasswordPrompt}
+      onClose={() => setShowPasswordPrompt(false)}
+      onSubmit={handleLoadCredentials}
+      title="Admin Access - Enter Encryption Password"
+      description="As an admin, you can view the bucket credentials and encryption password. Please enter the encryption password to decrypt and display the sensitive information."
+    />
+    </>
   );
 }
