@@ -3,12 +3,30 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { decryptCredentialsWithPassword } from "@/lib/encryption";
+import { applyRateLimit, getClientIP, createRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ bucketId: string }> }
 ) {
   try {
+    // Apply rate limiting for admin operations
+    const clientIP = getClientIP(request);
+    const rateLimit = applyRateLimit(clientIP, RATE_LIMITS.ADMIN);
+
+    if (!rateLimit.allowed) {
+      const headers = createRateLimitHeaders(
+        rateLimit.remaining,
+        rateLimit.resetTime,
+        RATE_LIMITS.ADMIN.maxRequests
+      );
+
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429, headers }
+      );
+    }
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -56,15 +74,11 @@ export async function POST(
 
     // Decrypt credentials for admin viewing
     try {
-      console.log('Attempting to decrypt credentials for admin...');
       const { accessKey, secretKey } = decryptCredentialsWithPassword(
         bucket.encryptedAccessKey,
         bucket.encryptedSecretKey,
         password
       );
-
-      console.log('Decryption successful, accessKey length:', accessKey?.length);
-      console.log('Decryption successful, secretKey length:', secretKey?.length);
 
       // Return bucket data with decrypted credentials for admin viewing
       const adminBucketData = {
@@ -79,7 +93,6 @@ export async function POST(
         encryptionPassword: password, // Show the encryption password to admins
       };
 
-      console.log('Returning admin bucket data:', { ...adminBucketData, accessKey: '***', secretKey: '***', encryptionPassword: '***' });
       return NextResponse.json({ bucket: adminBucketData });
     } catch (decryptError) {
       return NextResponse.json(

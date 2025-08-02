@@ -60,11 +60,7 @@ export function BucketForm({
   // Update form data when initialData changes (e.g., when credentials are loaded)
   useEffect(() => {
     if (initialData) {
-      console.log('BucketForm updating with credentials:', {
-        hasAccessKey: !!initialData.accessKey,
-        hasSecretKey: !!initialData.secretKey,
-        hasEncryptionPassword: !!initialData.encryptionPassword
-      });
+
       setFormData({
         name: initialData.name || "",
         provider: initialData.provider || "aws",
@@ -77,10 +73,8 @@ export function BucketForm({
       });
       // If credentials are present, mark them as loaded
       if (initialData.accessKey && initialData.secretKey) {
-        console.log('Marking credentials as loaded');
         setCredentialsLoaded(true);
       } else {
-        console.log('No credentials in initialData, keeping credentialsLoaded as false');
         setCredentialsLoaded(false);
       }
     }
@@ -164,13 +158,9 @@ export function BucketForm({
   };
 
   const handleLoadCredentials = async (password: string) => {
-    console.log('handleLoadCredentials called with password');
     if (onLoadCredentials) {
-      console.log('Calling onLoadCredentials...');
       const success = await onLoadCredentials(password);
-      console.log('onLoadCredentials result:', success);
       if (success) {
-        console.log('Setting credentialsLoaded to true');
         setCredentialsLoaded(true);
         return true;
       }

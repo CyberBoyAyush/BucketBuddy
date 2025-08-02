@@ -3,12 +3,30 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, decryptCredentialsWithPassword } from "@/lib/encryption";
 import { headers } from "next/headers";
+import { applyRateLimit, getClientIP, createRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ bucketId: string }> }
 ) {
   try {
+    // Apply rate limiting for password verification (brute force protection)
+    const clientIP = getClientIP(request);
+    const rateLimit = applyRateLimit(clientIP, RATE_LIMITS.PASSWORD_VERIFY);
+
+    if (!rateLimit.allowed) {
+      const headers = createRateLimitHeaders(
+        rateLimit.remaining,
+        rateLimit.resetTime,
+        RATE_LIMITS.PASSWORD_VERIFY.maxRequests
+      );
+
+      return NextResponse.json(
+        { error: "Too many password attempts. Please try again later." },
+        { status: 429, headers }
+      );
+    }
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -52,7 +70,6 @@ export async function POST(
 
     // Verify password using stored hash if available, otherwise try decryption
     if (bucket.passwordHash) {
-      console.log('Using password hash verification');
       const isValidPassword = verifyPassword(password, bucket.passwordHash);
       if (isValidPassword) {
         return NextResponse.json({
@@ -67,7 +84,6 @@ export async function POST(
       }
     } else {
       // Fallback to decryption verification for buckets without password hash
-      console.log('Using decryption verification (no password hash found)');
       try {
         decryptCredentialsWithPassword(
           bucket.encryptedAccessKey,
@@ -75,13 +91,11 @@ export async function POST(
           password
         );
 
-        console.log('Decryption verification successful');
         return NextResponse.json({
           success: true,
           message: "Password verified successfully"
         });
       } catch (error) {
-        console.error('Decryption verification failed:', error);
         return NextResponse.json({
           success: false,
           error: "Invalid password"
@@ -90,9 +104,8 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error("Error verifying password:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Password verification failed" },
       { status: 500 }
     );
   }

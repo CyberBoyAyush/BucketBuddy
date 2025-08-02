@@ -252,7 +252,6 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
     setPasswordError("");
 
     try {
-      console.log('Verifying password for bucket:', bucketId);
       const response = await fetch(`/api/buckets/${bucketId}/verify-password`, {
         method: "POST",
         headers: {
@@ -261,10 +260,7 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
         body: JSON.stringify({ password }),
       });
 
-      console.log('Password verification response:', response.status);
-
       if (response.ok) {
-        console.log('Password verified successfully, storing locally');
         // Store password locally and close prompt
         storeBucketPassword(bucketId, password);
         setShowPasswordPrompt(false);
@@ -272,7 +268,6 @@ export function FileBrowser({ bucketId }: FileBrowserProps) {
         fetchObjects();
       } else {
         const { error } = await response.json();
-        console.error('Password verification failed:', error);
         setPasswordError(error || "Invalid password");
       }
     } catch (error) {

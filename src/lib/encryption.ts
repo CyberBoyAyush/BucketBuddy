@@ -11,7 +11,6 @@ export function encryptWithPassword(text: string, password: string): string {
     const encrypted = CryptoJS.AES.encrypt(text, password).toString();
     return encrypted;
   } catch (error) {
-    console.error('Encryption error:', error);
     throw new Error('Failed to encrypt data');
   }
 }
@@ -33,7 +32,6 @@ export function decryptWithPassword(encryptedText: string, password: string): st
 
     return originalText;
   } catch (error) {
-    console.error('Decryption error:', error);
     throw new Error('Failed to decrypt data - invalid password or corrupted data');
   }
 }
@@ -47,7 +45,6 @@ export function hashPassword(password: string): string {
   try {
     return CryptoJS.SHA256(password).toString();
   } catch (error) {
-    console.error('Password hashing error:', error);
     throw new Error('Failed to hash password');
   }
 }
@@ -63,7 +60,6 @@ export function verifyPassword(password: string, hash: string): boolean {
     const passwordHash = CryptoJS.SHA256(password).toString();
     return passwordHash === hash;
   } catch (error) {
-    console.error('Password verification error:', error);
     return false;
   }
 }

@@ -4,9 +4,27 @@ import { prisma } from "@/lib/prisma";
 import { encryptCredentialsWithPassword, hashPassword } from "@/lib/encryption";
 import { S3Service } from "@/lib/s3-service";
 import { headers } from "next/headers";
+import { applyRateLimit, getClientIP, createRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function GET(request: NextRequest) {
   try {
+    // Apply rate limiting for API endpoints
+    const clientIP = getClientIP(request);
+    const rateLimit = applyRateLimit(clientIP, RATE_LIMITS.API);
+
+    if (!rateLimit.allowed) {
+      const headers = createRateLimitHeaders(
+        rateLimit.remaining,
+        rateLimit.resetTime,
+        RATE_LIMITS.API.maxRequests
+      );
+
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429, headers }
+      );
+    }
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -91,6 +109,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting for API endpoints
+    const clientIP = getClientIP(request);
+    const rateLimit = applyRateLimit(clientIP, RATE_LIMITS.API);
+
+    if (!rateLimit.allowed) {
+      const headers = createRateLimitHeaders(
+        rateLimit.remaining,
+        rateLimit.resetTime,
+        RATE_LIMITS.API.maxRequests
+      );
+
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429, headers }
+      );
+    }
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });

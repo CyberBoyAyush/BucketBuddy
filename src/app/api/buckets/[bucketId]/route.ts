@@ -62,11 +62,8 @@ export async function GET(
     });
 
     if (!bucket) {
-      console.log('Bucket not found:', bucketId);
       return NextResponse.json({ error: "Bucket not found" }, { status: 404 });
     }
-
-    console.log('Bucket found:', bucket.id, bucket.name);
 
     // Remove encrypted credentials from response
     const safeBucket = {
@@ -85,9 +82,8 @@ export async function GET(
 
     return NextResponse.json({ bucket: safeBucket });
   } catch (error) {
-    console.error("Error fetching bucket:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to fetch bucket" },
       { status: 500 }
     );
   }
@@ -219,7 +215,7 @@ export async function PUT(
 
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ bucketId: string }> }
 ) {
   try {
