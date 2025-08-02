@@ -15,14 +15,23 @@ interface Bucket {
   region: string;
   endpoint?: string;
   bucketName: string;
-  accessKey: string;
-  secretKey: string;
+  accessKey?: string;
+  secretKey?: string;
+}
+
+interface BucketPermissions {
+  role: string;
+  isOwner: boolean;
+  canRead: boolean;
+  canWrite: boolean;
+  canAdmin: boolean;
 }
 
 export default function BucketSettingsPage({ params }: { params: Promise<{ bucketId: string }> }) {
   const router = useRouter();
   const { addToast } = useToast();
   const [bucket, setBucket] = useState<Bucket | null>(null);
+  const [permissions, setPermissions] = useState<BucketPermissions | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -33,16 +42,19 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
 
   useEffect(() => {
     fetchBucket();
+    fetchPermissions();
   }, [bucketId]);
 
   const fetchBucket = async () => {
     try {
-      // Use the edit endpoint to get decrypted credentials
-      const response = await fetch(`/api/buckets/${bucketId}/edit`);
+      // Use the regular bucket endpoint to get basic info
+      const response = await fetch(`/api/buckets/${bucketId}`);
       if (response.ok) {
         const { bucket } = await response.json();
         setBucket(bucket);
         setHasAccess(true);
+
+        // Credentials will be loaded separately for admins when they request it
       } else if (response.status === 404) {
         setHasAccess(false);
       } else {
@@ -60,6 +72,18 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPermissions = async () => {
+    try {
+      const response = await fetch(`/api/buckets/${bucketId}/permissions`);
+      if (response.ok) {
+        const { permissions } = await response.json();
+        setPermissions(permissions);
+      }
+    } catch (error) {
+      console.error("Failed to fetch permissions:", error);
     }
   };
 
@@ -94,6 +118,41 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
       throw error;
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const loadCredentialsForAdmin = async (password: string) => {
+    try {
+      // Temporarily use the edit endpoint to test decryption
+      const response = await fetch(`/api/buckets/${bucketId}/edit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (response.ok) {
+        const { bucket: bucketWithCredentials } = await response.json();
+        console.log('Successfully loaded admin credentials');
+        setBucket(bucketWithCredentials);
+        return true;
+      } else {
+        const { error } = await response.json();
+        addToast({
+          type: "error",
+          title: "Invalid Password",
+          message: error || "Failed to decrypt credentials",
+        });
+        return false;
+      }
+    } catch (error) {
+      addToast({
+        type: "error",
+        title: "Error",
+        message: "Failed to load credentials",
+      });
+      return false;
     }
   };
 
@@ -159,7 +218,7 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
         <div className="text-center py-12">
           <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
           <h3 className="text-xl font-semibold hetzner-text mb-2">Access Denied</h3>
-          <p className="hetzner-text-muted mb-4">Only bucket owners can access settings</p>
+          <p className="hetzner-text-muted mb-4">You don't have permission to access this bucket's settings</p>
           <Link href="/dashboard/buckets" className="hetzner-red hover:text-red-300">
             Back to buckets
           </Link>
@@ -167,6 +226,9 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
       </DashboardLayout>
     );
   }
+
+  // Check if user has admin access (owner or admin role)
+  const hasAdminAccess = permissions?.isOwner || permissions?.canAdmin;
 
   return (
     <DashboardLayout>
@@ -193,6 +255,8 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
             onSubmit={handleUpdate}
             isSubmitting={isSubmitting}
             initialData={bucket}
+            isAdmin={hasAdminAccess}
+            onLoadCredentials={loadCredentialsForAdmin}
           />
         </div>
 
