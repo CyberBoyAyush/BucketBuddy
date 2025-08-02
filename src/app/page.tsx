@@ -338,7 +338,7 @@ export default function Home() {
                 <span>hi@aysh.me</span>
               </a>
               <a
-                href="https://github.com/bucketbuddy"
+                href="https://github.com/cyberboyayush/bucketbuddy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 hetzner-text-muted hover:hetzner-text transition-colors duration-200 text-sm"
