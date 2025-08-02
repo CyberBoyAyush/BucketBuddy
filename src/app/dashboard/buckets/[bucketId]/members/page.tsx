@@ -98,7 +98,7 @@ export default function BucketMembersPage() {
         setError(error || "Failed to add member");
       }
     } catch (error) {
-      setError("Failed to send invitation");
+      setError("Failed to add member");
     } finally {
       setInviting(false);
     }

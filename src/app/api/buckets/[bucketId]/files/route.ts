@@ -95,7 +95,6 @@ export async function GET(
       );
     }
   } catch (error) {
-    console.error("Error listing files:", error);
     return NextResponse.json(
       { error: "Failed to list files" },
       { status: 500 }
@@ -190,7 +189,6 @@ export async function POST(
       );
     }
   } catch (error) {
-    console.error("Error generating upload URL:", error);
     return NextResponse.json(
       { error: "Failed to generate upload URL" },
       { status: 500 }

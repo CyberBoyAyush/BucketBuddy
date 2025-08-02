@@ -134,7 +134,6 @@ export default function BucketSettingsPage({ params }: { params: Promise<{ bucke
 
       if (response.ok) {
         const { bucket: bucketWithCredentials } = await response.json();
-        console.log('Successfully loaded admin credentials');
         setBucket(bucketWithCredentials);
         return true;
       } else {

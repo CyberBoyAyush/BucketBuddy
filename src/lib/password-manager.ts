@@ -43,7 +43,6 @@ export function storeBucketPassword(bucketId: string, password: string): void {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(passwords));
-    console.log('Password stored successfully for bucket:', bucketId);
   } catch (error) {
     console.error('Error storing bucket password:', error);
   }

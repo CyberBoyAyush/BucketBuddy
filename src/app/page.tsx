@@ -76,9 +76,9 @@ export default function Home() {
             {/* Social Proof */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm hetzner-text-muted">
               <div className="flex items-center">
-                <div className="flex -space-x-2 mr-3">
+                <div className="flex items-center gap-0.5 mr-3">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
+                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
                 <span>4.9/5 from 2,000+ reviews</span>
@@ -231,9 +231,11 @@ export default function Home() {
                 className="group p-8 rounded-2xl hetzner-card border hetzner-border hover:border-red-500/30 transition-all duration-500 hover:scale-105 hover:shadow-xl hover:shadow-red-500/10"
               >
                 <div className="flex items-center mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
-                  ))}
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                    ))}
+                  </div>
                 </div>
                 <p className="hetzner-text-muted mb-6 leading-relaxed italic">
                   "{testimonial.content}"
