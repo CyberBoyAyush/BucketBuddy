@@ -146,7 +146,7 @@ export async function POST(
       );
     }
 
-    // Check if user is already a member or has a pending invitation
+    // Check if user is already a member
     const existingMember = await prisma.bucketMember.findUnique({
       where: {
         bucketId_userId: {
@@ -157,26 +157,20 @@ export async function POST(
     });
 
     if (existingMember) {
-      if (existingMember.acceptedAt) {
-        return NextResponse.json(
-          { error: "User is already a member of this bucket" },
-          { status: 409 }
-        );
-      } else {
-        return NextResponse.json(
-          { error: "User already has a pending invitation" },
-          { status: 409 }
-        );
-      }
+      return NextResponse.json(
+        { error: "User is already a member of this bucket" },
+        { status: 409 }
+      );
     }
 
-    // Create the invitation
-    const invitation = await prisma.bucketMember.create({
+    // Add user directly as member (no verification needed)
+    const member = await prisma.bucketMember.create({
       data: {
         bucketId: bucketId,
         userId: userToInvite.id,
         role,
         invitedBy: session.user.id,
+        acceptedAt: new Date(), // Accept immediately
       },
       include: {
         user: {
@@ -196,11 +190,9 @@ export async function POST(
       },
     });
 
-    // TODO: Send email notification to the invited user
-
-    return NextResponse.json({ invitation }, { status: 201 });
+    return NextResponse.json({ member }, { status: 201 });
   } catch (error) {
-    console.error("Error inviting user:", error);
+    console.error("Error adding member:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

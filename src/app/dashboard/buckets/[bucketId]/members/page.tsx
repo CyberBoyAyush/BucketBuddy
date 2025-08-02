@@ -88,14 +88,14 @@ export default function BucketMembersPage() {
       });
 
       if (response.ok) {
-        const { invitation } = await response.json();
-        setMembers([invitation, ...members]);
+        const { member } = await response.json();
+        setMembers([member, ...members]);
         setInviteEmail("");
         setInviteRole("viewer");
         setShowInviteForm(false);
       } else {
         const { error } = await response.json();
-        setError(error || "Failed to send invitation");
+        setError(error || "Failed to add member");
       }
     } catch (error) {
       setError("Failed to send invitation");
@@ -194,7 +194,7 @@ export default function BucketMembersPage() {
               className="inline-flex items-center px-4 py-2 hetzner-btn-primary rounded-lg transition-colors"
             >
               <UserPlus className="h-5 w-5 mr-2" />
-              Invite Member
+              Add Member
             </button>
           )}
         </div>
@@ -202,7 +202,7 @@ export default function BucketMembersPage() {
         {/* Invite Form */}
         {showInviteForm && (
           <div className="hetzner-card rounded-xl p-6">
-            <h3 className="text-lg font-semibold hetzner-text mb-4">Invite New Member</h3>
+            <h3 className="text-lg font-semibold hetzner-text mb-4">Add New Member</h3>
             <form onSubmit={handleInvite} className="space-y-4">
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
@@ -259,7 +259,7 @@ export default function BucketMembersPage() {
                   ) : (
                     <UserPlus className="h-4 w-4 mr-2" />
                   )}
-                  Send Invitation
+                  Add Member
                 </button>
               </div>
             </form>
@@ -277,7 +277,7 @@ export default function BucketMembersPage() {
               <UserPlus className="h-12 w-12 hetzner-text-muted mx-auto mb-4" />
               <h4 className="text-lg font-medium hetzner-text mb-2">No members yet</h4>
               <p className="hetzner-text-muted mb-4">
-                Invite team members to collaborate on this bucket
+                Add team members to collaborate on this bucket
               </p>
               {bucket.isOwner && (
                 <button
@@ -285,7 +285,7 @@ export default function BucketMembersPage() {
                   className="inline-flex items-center px-4 py-2 hetzner-btn-primary rounded-lg transition-colors"
                 >
                   <UserPlus className="h-5 w-5 mr-2" />
-                  Invite First Member
+                  Add First Member
                 </button>
               )}
             </div>
@@ -303,17 +303,10 @@ export default function BucketMembersPage() {
                       </span>
                     </div>
                     <div>
-                      <div className="flex items-center space-x-2">
-                        <p className="hetzner-text font-medium">{member.user.name}</p>
-                        {!member.acceptedAt && (
-                          <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 text-xs rounded-full">
-                            Pending
-                          </span>
-                        )}
-                      </div>
+                      <p className="hetzner-text font-medium">{member.user.name}</p>
                       <p className="hetzner-text-muted text-sm">{member.user.email}</p>
                       <p className="hetzner-text-subtle text-xs">
-                        Invited by {member.inviter.name} on{" "}
+                        Added by {member.inviter.name} on{" "}
                         {new Date(member.invitedAt).toLocaleDateString()}
                       </p>
                     </div>
