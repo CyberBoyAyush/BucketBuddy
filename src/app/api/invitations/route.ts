@@ -13,32 +13,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get pending invitations for the current user
-    const invitations = await prisma.bucketMember.findMany({
-      where: {
-        userId: session.user.id,
-        acceptedAt: null,
-      },
-      include: {
-        bucket: {
-          select: {
-            id: true,
-            name: true,
-            provider: true,
-          },
-        },
-        inviter: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        invitedAt: "desc",
-      },
-    });
+    // Since we no longer use invitations (members are added directly), return empty array
+    const invitations: any[] = [];
 
     return NextResponse.json({ invitations });
   } catch (error) {
